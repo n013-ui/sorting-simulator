@@ -269,7 +269,7 @@ function submitTest(){
   document.getElementById('dBody').innerHTML=b;
 
   submitToSheets({subject:SUBJECT,class:student.class,seat:student.seat,name:student.name,
-    score:ok,total,pct,elapsed:fmtTime(timerSec),original:originalArr.join(',')});
+    score:ok,total,pct,elapsed:fmtTime(timerSec),original:originalArr.join(','),count:n});
 }
 
 function submitToSheets(data){
