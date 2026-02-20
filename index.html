@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>排序模擬器 ⚖️</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --card2: #273449;
+    --accent: #38bdf8;
+    --accent2: #f472b6;
+    --gold: #fbbf24;
+    --green: #4ade80;
+    --red: #f87171;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --border: #334155;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 16px;
+  }
+  h1 {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 4px;
+  }
+  .subtitle {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+  }
+
+  /* CONTROLS */
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 20px;
+    background: var(--card);
+    padding: 14px;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+  }
+  .ctrl-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .ctrl-group label { font-size: 0.85rem; color: var(--muted); font-weight: 700; }
+  select, input[type=range] {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+  .btn {
+    padding: 8px 18px;
+    border-radius: 10px;
+    border: none;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn:hover { transform: translateY(-2px); filter: brightness(1.15); }
+  .btn:active { transform: translateY(0); }
+  .btn-primary { background: var(--accent); color: #0f172a; }
+  .btn-danger { background: var(--red); color: #0f172a; }
+  .btn-success { background: var(--green); color: #0f172a; }
+  .btn-gold { background: var(--gold); color: #0f172a; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  /* STATS */
+  .stats {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 20px;
+    text-align: center;
+    min-width: 110px;
+  }
+  .stat-card .val {
+    font-size: 1.8rem;
+    font-weight: 900;
+    line-height: 1;
+  }
+  .stat-card .lbl {
+    font-size: 0.75rem;
+    color: var(--muted);
+    font-weight: 700;
+    margin-top: 2px;
+  }
+  .val-compare { color: var(--accent); }
+  .val-swap { color: var(--accent2); }
+  .val-pass { color: var(--gold); }
+  .val-status { color: var(--green); font-size: 1rem !important; }
+
+  /* SCALE AREA */
+  .scale-area {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+    text-align: center;
+    min-height: 180px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .scale-label {
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-weight: 700;
+    margin-bottom: 10px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .scale-container {
+    position: relative;
+    width: 300px;
+    height: 130px;
+  }
+  .scale-pole {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%);
+    width: 6px;
+    height: 60px;
+    background: #64748b;
+    border-radius: 3px;
+  }
+  .scale-beam {
+    position: absolute;
+    top: 55px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 260px;
+    height: 8px;
+    background: #64748b;
+    border-radius: 4px;
+    transition: transform 0.5s cubic-bezier(.34,1.56,.64,1);
+    transform-origin: center center;
+  }
+  .scale-pan {
+    position: absolute;
+    bottom: 0;
+    width: 80px;
+    height: 14px;
+    background: #475569;
+    border-radius: 7px;
+    transition: all 0.5s;
+  }
+  .scale-pan-left { left: 10px; }
+  .scale-pan-right { right: 10px; }
+  .scale-ball-on-pan {
+    position: absolute;
+    bottom: 14px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 1.3rem;
+    color: #fff;
+    transition: all 0.5s;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+  }
+  .scale-ball-on-pan.left { left: 15px; }
+  .scale-ball-on-pan.right { right: 15px; }
+  .scale-result {
+    margin-top: 8px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    min-height: 20px;
+  }
+
+  /* ARRAY DISPLAY */
+  .array-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .array-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 14px;
+  }
+  .balls-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    align-items: flex-end;
+    min-height: 80px;
+  }
+  .ball-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.4s;
+  }
+  .ball {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 1.3rem;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    transition: all 0.4s cubic-bezier(.34,1.56,.64,1);
+    position: relative;
+  }
+  .ball.comparing {
+    outline: 3px solid var(--accent);
+    outline-offset: 3px;
+    transform: scale(1.15) translateY(-6px);
+  }
+  .ball.swapping {
+    outline: 3px solid var(--accent2);
+    outline-offset: 3px;
+    transform: scale(1.2) translateY(-10px);
+  }
+  .ball.sorted {
+    outline: 3px solid var(--green);
+    outline-offset: 3px;
+    opacity: 0.75;
+  }
+  .ball-idx {
+    font-size: 0.65rem;
+    color: var(--muted);
+    font-weight: 700;
+  }
+
+  /* STEP LOG */
+  .log-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 20px;
+  }
+  .log-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .log-list {
+    max-height: 180px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .log-entry {
+    font-size: 0.82rem;
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: var(--card2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .log-entry .tag {
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 2px 7px;
+    border-radius: 5px;
+    flex-shrink: 0;
+  }
+  .tag-compare { background: #0ea5e9; color: #0f172a; }
+  .tag-swap { background: var(--accent2); color: #0f172a; }
+  .tag-pass { background: var(--gold); color: #0f172a; }
+  .tag-done { background: var(--green); color: #0f172a; }
+
+  /* MESSAGE */
+  .message-box {
+    background: var(--card2);
+    border-left: 4px solid var(--accent);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  /* STEP CONTROLS */
+  .step-controls {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  /* HISTORY TABLE */
+  .history-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    margin-top: 20px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+  }
+  th {
+    text-align: left;
+    padding: 6px 10px;
+    color: var(--muted);
+    font-weight: 700;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+  }
+  td {
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  tr:last-child td { border-bottom: none; }
+  .best { color: var(--green); font-weight: 800; }
+
+  @media (max-width: 480px) {
+    h1 { font-size: 1.5rem; }
+    .ball { width: 42px; height: 42px; font-size: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<h1>⚖️ 排序模擬器</h1>
+<p class="subtitle">泡泡排序法 (Bubble Sort) 互動練習</p>
+
+<!-- CONTROLS -->
+<div class="controls">
+  <div class="ctrl-group">
+    <label>球數：</label>
+    <select id="ballCount">
+      <option value="4">4 顆</option>
+      <option value="5" selected>5 顆</option>
+      <option value="6">6 顆</option>
+      <option value="7">7 顆</option>
+      <option value="8">8 顆</option>
+    </select>
+  </div>
+  <div class="ctrl-group">
+    <label>速度：</label>
+    <input type="range" id="speed" min="200" max="2000" step="100" value="800">
+    <span id="speedLabel" style="font-size:0.8rem;color:var(--muted)">0.8s</span>
+  </div>
+  <button class="btn btn-primary" onclick="initSort()">🔀 重新產生</button>
+  <button class="btn btn-gold" onclick="autoPlay()" id="autoBtn">▶ 自動播放</button>
+</div>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat-card">
+    <div class="val val-compare" id="statCompare">0</div>
+    <div class="lbl">⚖️ 秤重次數</div>
+  </div>
+  <div class="stat-card">
+    <div class="val val-swap" id="statSwap">0</div>
+    <div class="lbl">🔄 交換次數</div>
+  </div>
+  <div class="stat-card">
+    <div class="val val-pass" id="statPass">0</div>
+    <div class="lbl">🔁 回合數</div>
+  </div>
+  <div class="stat-card">
+    <div class="val val-status" id="statStatus">準備中</div>
+    <div class="lbl">📊 狀態</div>
+  </div>
+</div>
+
+<!-- MESSAGE -->
+<div class="message-box" id="msgBox">點選「重新產生」開始練習排序！</div>
+
+<!-- SCALE -->
+<div class="scale-area">
+  <div class="scale-label">⚖️ 目前比較</div>
+  <div class="scale-container" id="scaleContainer">
+    <div class="scale-pole"></div>
+    <div class="scale-beam" id="scaleBeam">
+      <div class="scale-ball-on-pan left" id="scaleBallL" style="display:none"></div>
+      <div class="scale-ball-on-pan right" id="scaleBallR" style="display:none"></div>
+    </div>
+    <div class="scale-pan scale-pan-left" id="panL"></div>
+    <div class="scale-pan scale-pan-right" id="panR"></div>
+  </div>
+  <div class="scale-result" id="scaleResult"></div>
+</div>
+
+<!-- ARRAY DISPLAY -->
+<div class="array-section">
+  <div class="array-title">🎱 目前排列</div>
+  <div class="balls-row" id="ballsRow"></div>
+</div>
+
+<!-- STEP CONTROLS -->
+<div class="step-controls">
+  <button class="btn btn-success" id="stepBtn" onclick="nextStep()" disabled>➡️ 下一步</button>
+  <button class="btn btn-danger" onclick="initSort()">🔄 重置</button>
+</div>
+
+<!-- LOG -->
+<div class="log-section">
+  <div class="log-title">
+    <span>📋 操作紀錄</span>
+    <span id="logCount" style="font-weight:400">0 筆</span>
+  </div>
+  <div class="log-list" id="logList"></div>
+</div>
+
+<!-- HISTORY -->
+<div class="history-section">
+  <div class="log-title">
+    <span>🏆 歷史紀錄</span>
+    <button class="btn btn-danger" style="padding:4px 10px;font-size:0.75rem" onclick="clearHistory()">清除</button>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>球數</th>
+        <th>秤重次數</th>
+        <th>交換次數</th>
+        <th>回合數</th>
+        <th>時間</th>
+      </tr>
+    </thead>
+    <tbody id="historyBody"></tbody>
+  </table>
+</div>
+
+<script>
+const COLORS = [
+  '#f43f5e','#f97316','#eab308','#22c55e',
+  '#06b6d4','#6366f1','#a855f7','#ec4899'
+];
+
+let arr = [];
+let steps = [];
+let stepIdx = 0;
+let compareCount = 0;
+let swapCount = 0;
+let passCount = 0;
+let sortDone = false;
+let autoTimer = null;
+let history = JSON.parse(localStorage.getItem('sortHistory') || '[]');
+let startTime = null;
+
+const speed = document.getElementById('speed');
+speed.addEventListener('input', () => {
+  document.getElementById('speedLabel').textContent = (speed.value/1000).toFixed(1) + 's';
+});
+
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function initSort() {
+  stopAuto();
+  const n = parseInt(document.getElementById('ballCount').value);
+  arr = shuffle([...Array(n)].map((_, i) => i + 1));
+  compareCount = 0; swapCount = 0; passCount = 0; sortDone = false;
+  steps = generateSteps([...arr]);
+  stepIdx = 0;
+  startTime = Date.now();
+  renderBalls(arr, [], [], []);
+  resetScale();
+  updateStats();
+  clearLog();
+  document.getElementById('stepBtn').disabled = false;
+  document.getElementById('msgBox').textContent = '✅ 已產生 ' + n + ' 顆球！點「下一步」開始比較，或「自動播放」。';
+  document.getElementById('statStatus').textContent = '進行中';
+}
+
+function generateSteps(a) {
+  const steps = [];
+  const n = a.length;
+  const sorted = new Set();
+  for (let pass = 0; pass < n - 1; pass++) {
+    steps.push({ type: 'pass', pass: pass + 1 });
+    let swapped = false;
+    for (let j = 0; j < n - 1 - pass; j++) {
+      steps.push({ type: 'compare', i: j, j: j + 1, arr: [...a], sorted: [...sorted] });
+      if (a[j] > a[j + 1]) {
+        [a[j], a[j + 1]] = [a[j + 1], a[j]];
+        steps.push({ type: 'swap', i: j, j: j + 1, arr: [...a], sorted: [...sorted] });
+        swapped = true;
+      }
+    }
+    sorted.add(n - 1 - pass);
+    steps.push({ type: 'passEnd', pass: pass + 1, sorted: [...sorted], arr: [...a] });
+    if (!swapped) break;
+  }
+  // mark all sorted
+  for (let k = 0; k < n; k++) sorted.add(k);
+  steps.push({ type: 'done', arr: [...a], sorted: [...sorted] });
+  return steps;
+}
+
+function nextStep() {
+  if (stepIdx >= steps.length) return;
+  const step = steps[stepIdx++];
+  applyStep(step);
+  if (sortDone) {
+    document.getElementById('stepBtn').disabled = true;
+    stopAuto();
+  }
+}
+
+function applyStep(step) {
+  if (step.type === 'pass') {
+    passCount++;
+    addLog('pass', `第 ${step.pass} 回合開始`);
+    updateStats();
+    document.getElementById('msgBox').textContent = `🔁 第 ${step.pass} 回合：從頭開始比較相鄰的球`;
+    renderBalls(step.arr || arr, [], [], []);
+    resetScale();
+  } else if (step.type === 'compare') {
+    compareCount++;
+    updateStats();
+    const left = step.arr[step.i], right = step.arr[step.j];
+    addLog('compare', `比較位置 ${step.i+1} (${left}) 和 位置 ${step.j+1} (${right})`);
+    document.getElementById('msgBox').innerHTML = `⚖️ 比較球 <b>${left}</b>（位置${step.i+1}）和球 <b>${right}</b>（位置${step.j+1}）`;
+    renderBalls(step.arr, [step.i, step.j], [], step.sorted);
+    showScale(left, right, step.i, step.j);
+  } else if (step.type === 'swap') {
+    swapCount++;
+    updateStats();
+    const left = step.arr[step.i], right = step.arr[step.j];
+    // arr reflects post-swap
+    addLog('swap', `交換 ${right}（位置${step.i+1}）↔ ${left}（位置${step.j+1}）`);
+    document.getElementById('msgBox').innerHTML = `🔄 球 <b>${right}</b> 比 <b>${left}</b> 小，交換位置！`;
+    renderBalls(step.arr, [], [step.i, step.j], step.sorted);
+    arr = [...step.arr];
+  } else if (step.type === 'passEnd') {
+    renderBalls(step.arr, [], [], step.sorted);
+    arr = [...step.arr];
+    resetScale();
+    document.getElementById('msgBox').textContent = `✅ 第 ${step.pass} 回合完成，最右邊的球已就位`;
+  } else if (step.type === 'done') {
+    sortDone = true;
+    renderBalls(step.arr, [], [], step.sorted);
+    arr = [...step.arr];
+    resetScale();
+    document.getElementById('msgBox').innerHTML = `🎉 排序完成！共秤重 <b>${compareCount}</b> 次，交換 <b>${swapCount}</b> 次，<b>${passCount}</b> 個回合`;
+    addLog('done', `排序完成！秤重 ${compareCount} 次 / 交換 ${swapCount} 次`);
+    document.getElementById('statStatus').textContent = '完成 🎉';
+    saveHistory();
+  }
+}
+
+function renderBalls(a, comparing, swapping, sortedArr) {
+  const row = document.getElementById('ballsRow');
+  row.innerHTML = '';
+  a.forEach((val, idx) => {
+    const item = document.createElement('div');
+    item.className = 'ball-item';
+    const ball = document.createElement('div');
+    ball.className = 'ball';
+    if (comparing.includes(idx)) ball.classList.add('comparing');
+    if (swapping.includes(idx)) ball.classList.add('swapping');
+    if (sortedArr && sortedArr.includes(idx)) ball.classList.add('sorted');
+    ball.style.background = COLORS[(val - 1) % COLORS.length];
+    ball.textContent = val;
+    const idx_label = document.createElement('div');
+    idx_label.className = 'ball-idx';
+    idx_label.textContent = idx + 1;
+    item.appendChild(ball);
+    item.appendChild(idx_label);
+    row.appendChild(item);
+  });
+}
+
+function showScale(leftVal, rightVal, li, ri) {
+  const beam = document.getElementById('scaleBeam');
+  const ballL = document.getElementById('scaleBallL');
+  const ballR = document.getElementById('scaleBallR');
+  const result = document.getElementById('scaleResult');
+  
+  ballL.style.display = 'flex';
+  ballR.style.display = 'flex';
+  ballL.textContent = leftVal;
+  ballR.textContent = rightVal;
+  ballL.style.background = COLORS[(leftVal - 1) % COLORS.length];
+  ballR.style.background = COLORS[(rightVal - 1) % COLORS.length];
+  
+  // tilt beam: left heavier → tilt left (negative angle)
+  let tilt = 0;
+  if (leftVal > rightVal) {
+    tilt = 12; // left side goes down
+    result.innerHTML = `<span style="color:var(--accent2)">球 ${leftVal} > 球 ${rightVal}，需要交換！</span>`;
+  } else if (leftVal < rightVal) {
+    tilt = -12;
+    result.innerHTML = `<span style="color:var(--green)">球 ${leftVal} < 球 ${rightVal}，不需交換 ✓</span>`;
+  } else {
+    tilt = 0;
+    result.innerHTML = `<span style="color:var(--muted)">兩球相等，不需交換</span>`;
+  }
+  beam.style.transform = `translateX(-50%) rotate(${tilt}deg)`;
+}
+
+function resetScale() {
+  document.getElementById('scaleBeam').style.transform = 'translateX(-50%) rotate(0deg)';
+  document.getElementById('scaleBallL').style.display = 'none';
+  document.getElementById('scaleBallR').style.display = 'none';
+  document.getElementById('scaleResult').textContent = '';
+}
+
+function updateStats() {
+  document.getElementById('statCompare').textContent = compareCount;
+  document.getElementById('statSwap').textContent = swapCount;
+  document.getElementById('statPass').textContent = passCount;
+}
+
+function addLog(type, msg) {
+  const list = document.getElementById('logList');
+  const entry = document.createElement('div');
+  entry.className = 'log-entry';
+  const tag = document.createElement('span');
+  tag.className = 'tag';
+  if (type === 'compare') { tag.className += ' tag-compare'; tag.textContent = '秤重'; }
+  else if (type === 'swap') { tag.className += ' tag-swap'; tag.textContent = '交換'; }
+  else if (type === 'pass') { tag.className += ' tag-pass'; tag.textContent = '回合'; }
+  else { tag.className += ' tag-done'; tag.textContent = '完成'; }
+  entry.appendChild(tag);
+  entry.appendChild(document.createTextNode(msg));
+  list.appendChild(entry);
+  list.scrollTop = list.scrollHeight;
+  document.getElementById('logCount').textContent = list.children.length + ' 筆';
+}
+
+function clearLog() {
+  document.getElementById('logList').innerHTML = '';
+  document.getElementById('logCount').textContent = '0 筆';
+}
+
+function autoPlay() {
+  if (sortDone) { initSort(); return; }
+  if (autoTimer) { stopAuto(); return; }
+  document.getElementById('autoBtn').textContent = '⏸ 暫停';
+  autoTimer = setInterval(() => {
+    if (stepIdx >= steps.length || sortDone) {
+      stopAuto();
+      return;
+    }
+    nextStep();
+  }, parseInt(speed.value));
+}
+
+function stopAuto() {
+  if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
+  document.getElementById('autoBtn').textContent = '▶ 自動播放';
+}
+
+function saveHistory() {
+  const n = parseInt(document.getElementById('ballCount').value);
+  const elapsed = Math.round((Date.now() - startTime) / 1000);
+  history.unshift({ n, compare: compareCount, swap: swapCount, pass: passCount, time: new Date().toLocaleTimeString('zh-TW'), elapsed });
+  if (history.length > 20) history = history.slice(0, 20);
+  localStorage.setItem('sortHistory', JSON.stringify(history));
+  renderHistory();
+}
+
+function renderHistory() {
+  const tbody = document.getElementById('historyBody');
+  tbody.innerHTML = '';
+  history.forEach((h, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${i + 1}</td><td>${h.n}</td><td>${h.compare}</td><td>${h.swap}</td><td>${h.pass}</td><td>${h.time}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function clearHistory() {
+  history = [];
+  localStorage.removeItem('sortHistory');
+  renderHistory();
+}
+
+// Init
+renderHistory();
+initSort();
+</script>
+</body>
+</html>
