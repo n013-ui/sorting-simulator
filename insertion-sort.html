@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>插入排序法練習</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f172a; --card: #1e293b; --card2: #273449;
+  --accent: #38bdf8; --accent2: #f472b6; --gold: #fbbf24;
+  --green: #4ade80; --red: #f87171; --text: #e2e8f0;
+  --muted: #94a3b8; --border: #334155;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 16px; }
+
+h1 { text-align: center; font-size: 2rem; font-weight: 900; background: linear-gradient(135deg, #818cf8, var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 4px; }
+.subtitle { text-align: center; color: var(--muted); font-size: 0.9rem; margin-bottom: 20px; }
+
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 18px; margin-bottom: 16px; }
+
+/* Controls */
+.controls { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; }
+.ctrl-group { display: flex; align-items: center; gap: 8px; }
+.ctrl-group label { font-size: 0.85rem; color: var(--muted); font-weight: 700; }
+select { background: var(--card2); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 6px 10px; font-family: 'Nunito', sans-serif; font-size: 0.9rem; cursor: pointer; }
+.btn { padding: 8px 18px; border-radius: 10px; border: none; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.9rem; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+.btn:hover { transform: translateY(-2px); filter: brightness(1.15); }
+.btn:active { transform: translateY(0); }
+.btn-primary { background: #818cf8; color: #fff; }
+.btn-gold { background: var(--gold); color: #0f172a; }
+.btn-success { background: var(--green); color: #0f172a; }
+.btn-danger { background: var(--red); color: #0f172a; }
+.btn-muted { background: var(--card2); color: var(--muted); border: 1px solid var(--border); }
+.btn-sm { padding: 5px 12px; font-size: 0.8rem; }
+.btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none !important; filter: none !important; }
+
+/* Score bar */
+.score-bar { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+.score-item { text-align: center; }
+.score-item .val { font-size: 1.8rem; font-weight: 900; line-height: 1; }
+.score-item .lbl { font-size: 0.75rem; color: var(--muted); font-weight: 700; }
+.val-ok { color: var(--green); }
+.val-total { color: var(--accent); }
+.val-pct { color: var(--gold); }
+
+/* Algorithm hint */
+.algo-hint { background: var(--card2); border-left: 3px solid #818cf8; border-radius: 10px; padding: 10px 14px; font-size: 0.85rem; color: var(--muted); line-height: 1.6; }
+.algo-hint b { color: var(--text); }
+
+/* Table */
+.table-wrap { overflow-x: auto; }
+table.sort-table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
+.sort-table th { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); font-weight: 700; padding: 4px 8px; text-align: center; }
+.sort-table td { padding: 0 4px; vertical-align: middle; }
+.sort-table td.row-label { font-size: 0.88rem; font-weight: 800; color: var(--muted); white-space: nowrap; padding-right: 10px; }
+.sort-table td.row-label.original { color: var(--accent); }
+.sort-table td.row-label.round { color: var(--text); }
+.sort-table td.key-hint { font-size: 0.78rem; color: var(--muted); padding-left: 8px; white-space: nowrap; }
+.sort-table td.actions { padding-left: 8px; white-space: nowrap; }
+
+/* Data cells (original) */
+.data-cell {
+  width: 52px; height: 52px; border-radius: 12px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 1.3rem; font-weight: 900; color: #fff;
+  background: var(--card2); box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  border: 2px solid var(--border);
+}
+.data-cell.key-cell { border-color: var(--gold); box-shadow: 0 0 10px rgba(251,191,36,0.4); }
+
+/* Input cells */
+.input-wrap { display: inline-block; }
+.sort-input {
+  width: 52px; height: 52px; border-radius: 12px;
+  background: var(--card2); border: 2px solid var(--border);
+  color: var(--text); font-family: 'Nunito', sans-serif;
+  font-size: 1.2rem; font-weight: 900;
+  text-align: center; outline: none; cursor: text;
+  transition: border-color 0.2s, background 0.2s;
+  -moz-appearance: textfield;
+}
+.sort-input::-webkit-outer-spin-button,
+.sort-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.sort-input:focus { border-color: #818cf8; background: #1e1b4b; }
+.sort-input.correct { background: rgba(74,222,128,0.15); border-color: var(--green); color: var(--green); }
+.sort-input.incorrect { background: rgba(248,113,113,0.15); border-color: var(--red); color: var(--red); }
+.sort-input.revealed { background: rgba(56,189,248,0.12); border-color: var(--accent); color: var(--accent); }
+.sort-input:disabled { cursor: default; opacity: 1; }
+
+/* Row state indicator */
+.row-status { font-size: 0.85rem; font-weight: 800; min-width: 28px; display: inline-block; }
+.row-status.ok { color: var(--green); }
+.row-status.partial { color: var(--gold); }
+.row-status.wrong { color: var(--red); }
+.row-status.revealed { color: var(--accent); }
+
+/* Result message */
+.result-msg { text-align: center; font-weight: 800; font-size: 1rem; min-height: 32px; padding: 6px; }
+.result-msg.win { color: var(--green); }
+.result-msg.partial { color: var(--gold); }
+
+/* Ans all top */
+.top-actions { display: flex; gap: 10px; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+
+@media (max-width: 600px) {
+  .data-cell, .sort-input { width: 42px; height: 42px; font-size: 1rem; border-radius: 10px; }
+  h1 { font-size: 1.5rem; }
+}
+</style>
+</head>
+<body>
+
+<h1>📝 插入排序法練習</h1>
+<p class="subtitle">每一輪結束後，填入陣列的排列狀態</p>
+
+<!-- Controls -->
+<div class="card">
+  <div class="controls">
+    <div class="ctrl-group">
+      <label>數字個數：</label>
+      <select id="numCount" onchange="newQuestion()">
+        <option value="4">4 個</option>
+        <option value="5" selected>5 個</option>
+        <option value="6">6 個</option>
+        <option value="7">7 個</option>
+      </select>
+    </div>
+    <div class="ctrl-group">
+      <label>數字範圍：</label>
+      <select id="numRange">
+        <option value="20">1 – 20</option>
+        <option value="50">1 – 50</option>
+        <option value="99" selected>1 – 99</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" onclick="newQuestion()">🔀 新題目</button>
+    <button class="btn btn-gold" onclick="revealAll()">👁 Ans All</button>
+    <button class="btn btn-muted" onclick="resetAll()">↺ 全部重填</button>
+  </div>
+</div>
+
+<!-- Algorithm hint (toggle) -->
+<div class="card" id="hintCard">
+  <div class="algo-hint" id="algoHint">
+    載入中…
+  </div>
+</div>
+
+<!-- Score -->
+<div class="card">
+  <div class="score-bar">
+    <div class="score-item"><div class="val val-ok" id="scoreOk">0</div><div class="lbl">✓ 答對輪數</div></div>
+    <div class="score-item"><div class="val val-total" id="scoreTotal">0</div><div class="lbl">📋 總輪數</div></div>
+    <div class="score-item"><div class="val val-pct" id="scorePct">—</div><div class="lbl">🎯 正確率</div></div>
+  </div>
+  <div class="result-msg" id="resultMsg"></div>
+</div>
+
+<!-- Practice table -->
+<div class="card">
+  <div class="table-wrap">
+    <table class="sort-table" id="sortTable">
+      <thead id="tableHead"></thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+let originalArr = [];
+let steps = []; // steps[i] = { arr, key } for round i+1
+let n = 5;
+let rowRevealed = []; // bool per round
+
+// ── Insertion Sort ───────────────────────────────
+function insertionSortSteps(arr) {
+  const a = [...arr];
+  const result = [];
+  for (let i = 1; i < a.length; i++) {
+    const key = a[i];
+    let j = i - 1;
+    while (j >= 0 && a[j] > key) { a[j+1] = a[j]; j--; }
+    a[j+1] = key;
+    result.push({ arr: [...a], key, insertIdx: i });
+  }
+  return result;
+}
+
+// ── Generate ─────────────────────────────────────
+function shuffle(a) {
+  for (let i = a.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+function newQuestion() {
+  n = parseInt(document.getElementById('numCount').value);
+  const range = parseInt(document.getElementById('numRange').value);
+  // Generate n unique numbers
+  const pool = Array.from({length: range}, (_,i) => i+1);
+  shuffle(pool);
+  originalArr = pool.slice(0, n);
+  steps = insertionSortSteps([...originalArr]);
+  rowRevealed = Array(steps.length).fill(false);
+  renderTable();
+  updateScore();
+  document.getElementById('resultMsg').textContent = '';
+  updateHint();
+}
+
+// ── Hint ─────────────────────────────────────────
+function updateHint() {
+  const n = originalArr.length;
+  document.getElementById('algoHint').innerHTML =
+    `<b>插入排序法原理：</b>從第 2 個數開始，每一輪取出一個數（稱為「鍵值 key」），
+往左比較，遇到比它大的就右移，直到找到正確位置插入。<br>
+共需 <b>${steps.length} 輪</b>，第 <b>k</b> 輪結束後，前 <b>k+1</b> 個數已排序完成。`;
+}
+
+// ── Render Table ──────────────────────────────────
+const COLORS = ['#f43f5e','#f97316','#eab308','#22c55e','#06b6d4','#6366f1','#a855f7','#ec4899'];
+function cellColor(val) {
+  // deterministic color based on value (normalized to COLORS array)
+  const idx = (val - 1) % COLORS.length;
+  return COLORS[idx];
+}
+
+function renderTable() {
+  // Header
+  const thead = document.getElementById('tableHead');
+  let headerHtml = '<tr><th style="text-align:left">輪次</th>';
+  for (let i = 1; i <= n; i++) headerHtml += `<th>位置 ${i}</th>`;
+  headerHtml += '<th>鍵值</th><th>操作</th></tr>';
+  thead.innerHTML = headerHtml;
+
+  // Body
+  const tbody = document.getElementById('tableBody');
+  let html = '';
+
+  // Original row
+  html += '<tr>';
+  html += '<td class="row-label original">原始資料</td>';
+  for (let i = 0; i < n; i++) {
+    const val = originalArr[i];
+    const isKey1 = (i === 1); // first key to be inserted
+    html += `<td><div class="data-cell${isKey1 ? ' key-cell' : ''}" style="background:${cellColor(val)}">${val}</div></td>`;
+  }
+  html += `<td class="key-hint" style="color:var(--gold)">—</td>`;
+  html += '<td class="actions"></td>';
+  html += '</tr>';
+
+  // Round rows
+  steps.forEach((step, ri) => {
+    html += `<tr id="row-${ri}">`;
+    html += `<td class="row-label round">第 ${ri+1} 輪</td>`;
+    for (let ci = 0; ci < n; ci++) {
+      html += `<td><input type="number" class="sort-input" id="cell-${ri}-${ci}"
+        placeholder="?" min="1" max="999"
+        onkeydown="handleKey(event,${ri},${ci})"
+        oninput="onCellInput(${ri},${ci})"></td>`;
+    }
+    html += `<td class="key-hint"><span style="color:var(--gold);font-weight:800">← ${step.key}</span></td>`;
+    html += `<td class="actions" style="display:flex;gap:6px;align-items:center">
+      <span class="row-status" id="status-${ri}"></span>
+      <button class="btn btn-success btn-sm" onclick="checkRow(${ri})">✓ 確認</button>
+      <button class="btn btn-muted btn-sm" onclick="revealRow(${ri})">Ans</button>
+    </td>`;
+    html += '</tr>';
+  });
+
+  tbody.innerHTML = html;
+}
+
+// ── Key navigation ────────────────────────────────
+function handleKey(e, ri, ci) {
+  if (e.key === 'Enter' || e.key === 'Tab') {
+    e.preventDefault();
+    // Move to next cell (right, then next row start)
+    const nextCi = ci + 1;
+    if (nextCi < n) {
+      document.getElementById(`cell-${ri}-${nextCi}`)?.focus();
+    } else {
+      const nextRi = ri + 1;
+      if (nextRi < steps.length) {
+        document.getElementById(`cell-${nextRi}-0`)?.focus();
+      } else {
+        // Last cell: trigger check for this row
+        checkRow(ri);
+      }
+    }
+  }
+}
+
+function onCellInput(ri, ci) {
+  // Clear correctness styling when user edits
+  const el = document.getElementById(`cell-${ri}-${ci}`);
+  el.classList.remove('correct','incorrect','revealed');
+  document.getElementById(`status-${ri}`).textContent = '';
+  document.getElementById(`status-${ri}`).className = 'row-status';
+}
+
+// ── Check ─────────────────────────────────────────
+function checkRow(ri) {
+  if (rowRevealed[ri]) return;
+  const correct = steps[ri].arr;
+  let allCorrect = true, anyFilled = false;
+  for (let ci = 0; ci < n; ci++) {
+    const el = document.getElementById(`cell-${ri}-${ci}`);
+    const val = parseInt(el.value);
+    if (el.value.trim() === '' || isNaN(val)) {
+      el.classList.remove('correct','incorrect');
+      allCorrect = false;
+      continue;
+    }
+    anyFilled = true;
+    if (val === correct[ci]) {
+      el.classList.add('correct'); el.classList.remove('incorrect');
+    } else {
+      el.classList.add('incorrect'); el.classList.remove('correct');
+      allCorrect = false;
+    }
+  }
+  const statusEl = document.getElementById(`status-${ri}`);
+  if (allCorrect && anyFilled) {
+    statusEl.textContent = '✓'; statusEl.className = 'row-status ok';
+  } else if (anyFilled) {
+    statusEl.textContent = '✗'; statusEl.className = 'row-status wrong';
+  }
+  updateScore();
+}
+
+// ── Reveal ────────────────────────────────────────
+function revealRow(ri) {
+  rowRevealed[ri] = true;
+  const correct = steps[ri].arr;
+  for (let ci = 0; ci < n; ci++) {
+    const el = document.getElementById(`cell-${ri}-${ci}`);
+    el.value = correct[ci];
+    el.classList.remove('correct','incorrect');
+    el.classList.add('revealed');
+    el.disabled = true;
+  }
+  const statusEl = document.getElementById(`status-${ri}`);
+  statusEl.textContent = '👁'; statusEl.className = 'row-status revealed';
+  updateScore();
+}
+
+function revealAll() {
+  steps.forEach((_, ri) => revealRow(ri));
+}
+
+// ── Reset ─────────────────────────────────────────
+function resetAll() {
+  rowRevealed = Array(steps.length).fill(false);
+  steps.forEach((_, ri) => {
+    for (let ci = 0; ci < n; ci++) {
+      const el = document.getElementById(`cell-${ri}-${ci}`);
+      el.value = '';
+      el.classList.remove('correct','incorrect','revealed');
+      el.disabled = false;
+    }
+    const statusEl = document.getElementById(`status-${ri}`);
+    statusEl.textContent = ''; statusEl.className = 'row-status';
+  });
+  updateScore();
+  document.getElementById('resultMsg').textContent = '';
+}
+
+// ── Score ─────────────────────────────────────────
+function updateScore() {
+  let ok = 0;
+  const total = steps.length;
+  steps.forEach((step, ri) => {
+    let allCorrect = true, anyFilled = false;
+    for (let ci = 0; ci < n; ci++) {
+      const el = document.getElementById(`cell-${ri}-${ci}`);
+      if (!el) return;
+      const val = parseInt(el.value);
+      if (el.value.trim() === '' || isNaN(val)) { allCorrect = false; continue; }
+      anyFilled = true;
+      if (val !== step.arr[ci]) allCorrect = false;
+    }
+    if (allCorrect && anyFilled) ok++;
+  });
+  document.getElementById('scoreOk').textContent = ok;
+  document.getElementById('scoreTotal').textContent = total;
+  document.getElementById('scorePct').textContent = total > 0 ? Math.round(ok/total*100) + '%' : '—';
+  const msgEl = document.getElementById('resultMsg');
+  if (ok === total && total > 0) {
+    msgEl.textContent = '🎉 全部正確！排序演算法掌握得很好！';
+    msgEl.className = 'result-msg win';
+  } else if (ok > 0) {
+    msgEl.textContent = `✓ 已有 ${ok} 輪正確`;
+    msgEl.className = 'result-msg partial';
+  } else {
+    msgEl.textContent = '';
+  }
+}
+
+// ── Boot ─────────────────────────────────────────
+newQuestion();
+</script>
+</body>
+</html>
