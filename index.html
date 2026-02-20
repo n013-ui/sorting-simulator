@@ -3,384 +3,134 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>排序模擬器 ⚖️</title>
+<title>排序模擬器</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0f172a;
-    --card: #1e293b;
-    --card2: #273449;
-    --accent: #38bdf8;
-    --accent2: #f472b6;
-    --gold: #fbbf24;
-    --green: #4ade80;
-    --red: #f87171;
-    --text: #e2e8f0;
-    --muted: #94a3b8;
-    --border: #334155;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'Nunito', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    padding: 16px;
-  }
-  h1 {
-    text-align: center;
-    font-size: 2rem;
-    font-weight: 900;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin-bottom: 4px;
-  }
-  .subtitle {
-    text-align: center;
-    color: var(--muted);
-    font-size: 0.9rem;
-    margin-bottom: 20px;
-  }
+:root {
+  --bg: #0f172a; --card: #1e293b; --card2: #273449;
+  --accent: #38bdf8; --accent2: #f472b6; --gold: #fbbf24;
+  --green: #4ade80; --red: #f87171; --text: #e2e8f0;
+  --muted: #94a3b8; --border: #334155;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 16px; }
+h1 { text-align: center; font-size: 2rem; font-weight: 900; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 4px; }
+.subtitle { text-align: center; color: var(--muted); font-size: 0.9rem; margin-bottom: 16px; }
 
-  /* CONTROLS */
-  .controls {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: center;
-    margin-bottom: 20px;
-    background: var(--card);
-    padding: 14px;
-    border-radius: 16px;
-    border: 1px solid var(--border);
-  }
-  .ctrl-group {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .ctrl-group label { font-size: 0.85rem; color: var(--muted); font-weight: 700; }
-  select, input[type=range] {
-    background: var(--card2);
-    border: 1px solid var(--border);
-    color: var(--text);
-    border-radius: 8px;
-    padding: 6px 10px;
-    font-family: 'Nunito', sans-serif;
-    font-size: 0.9rem;
-    cursor: pointer;
-  }
-  .btn {
-    padding: 8px 18px;
-    border-radius: 10px;
-    border: none;
-    font-family: 'Nunito', sans-serif;
-    font-weight: 800;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .btn:hover { transform: translateY(-2px); filter: brightness(1.15); }
-  .btn:active { transform: translateY(0); }
-  .btn-primary { background: var(--accent); color: #0f172a; }
-  .btn-danger { background: var(--red); color: #0f172a; }
-  .btn-success { background: var(--green); color: #0f172a; }
-  .btn-gold { background: var(--gold); color: #0f172a; }
-  .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+.instructions { background: var(--card); border: 2px solid var(--accent); border-radius: 14px; padding: 16px 20px; margin-bottom: 16px; }
+.instructions .ititle { font-weight: 900; color: var(--accent); margin-bottom: 10px; font-size: 1rem; }
+.instructions ol { padding-left: 20px; }
+.instructions li { line-height: 2.2; font-size: 0.92rem; }
+.instructions li b { color: var(--gold); }
+.instructions .note { margin-top: 10px; padding: 8px 12px; background: var(--card2); border-radius: 8px; font-size: 0.85rem; color: var(--muted); }
 
-  /* STATS */
-  .stats {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin-bottom: 20px;
-  }
-  .stat-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 10px 20px;
-    text-align: center;
-    min-width: 110px;
-  }
-  .stat-card .val {
-    font-size: 1.8rem;
-    font-weight: 900;
-    line-height: 1;
-  }
-  .stat-card .lbl {
-    font-size: 0.75rem;
-    color: var(--muted);
-    font-weight: 700;
-    margin-top: 2px;
-  }
-  .val-compare { color: var(--accent); }
-  .val-swap { color: var(--accent2); }
-  .val-pass { color: var(--gold); }
-  .val-status { color: var(--green); font-size: 1rem !important; }
+.controls { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 16px; background: var(--card); padding: 12px; border-radius: 14px; border: 1px solid var(--border); }
+.ctrl-group { display: flex; align-items: center; gap: 8px; }
+.ctrl-group label { font-size: 0.85rem; color: var(--muted); font-weight: 700; }
+select { background: var(--card2); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 6px 10px; font-family: 'Nunito', sans-serif; font-size: 0.9rem; cursor: pointer; }
+.btn { padding: 8px 18px; border-radius: 10px; border: none; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.9rem; cursor: pointer; transition: all 0.15s; }
+.btn:hover { transform: translateY(-2px); filter: brightness(1.15); }
+.btn:active { transform: translateY(0); }
+.btn-primary { background: var(--accent); color: #0f172a; }
+.btn-danger { background: var(--red); color: #0f172a; }
+.btn-success { background: var(--green); color: #0f172a; }
+.btn-muted { background: var(--card2); color: var(--muted); border: 1px solid var(--border); }
+.btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none !important; filter: none !important; }
 
-  /* SCALE AREA */
-  .scale-area {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 20px;
-    margin-bottom: 20px;
-    text-align: center;
-    min-height: 180px;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-  .scale-label {
-    font-size: 0.8rem;
-    color: var(--muted);
-    font-weight: 700;
-    margin-bottom: 10px;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-  }
-  .scale-container {
-    position: relative;
-    width: 300px;
-    height: 130px;
-  }
-  .scale-pole {
-    position: absolute;
-    left: 50%;
-    top: 0;
-    transform: translateX(-50%);
-    width: 6px;
-    height: 60px;
-    background: #64748b;
-    border-radius: 3px;
-  }
-  .scale-beam {
-    position: absolute;
-    top: 55px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 260px;
-    height: 8px;
-    background: #64748b;
-    border-radius: 4px;
-    transition: transform 0.5s cubic-bezier(.34,1.56,.64,1);
-    transform-origin: center center;
-  }
-  .scale-pan {
-    position: absolute;
-    bottom: 0;
-    width: 80px;
-    height: 14px;
-    background: #475569;
-    border-radius: 7px;
-    transition: all 0.5s;
-  }
-  .scale-pan-left { left: 10px; }
-  .scale-pan-right { right: 10px; }
-  .scale-ball-on-pan {
-    position: absolute;
-    bottom: 14px;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 900;
-    font-size: 1.3rem;
-    color: #fff;
-    transition: all 0.5s;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-  }
-  .scale-ball-on-pan.left { left: 15px; }
-  .scale-ball-on-pan.right { right: 15px; }
-  .scale-result {
-    margin-top: 8px;
-    font-size: 0.9rem;
-    font-weight: 700;
-    min-height: 20px;
-  }
+.stats { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px; }
+.stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 10px 20px; text-align: center; min-width: 100px; }
+.stat-card .val { font-size: 1.8rem; font-weight: 900; line-height: 1; }
+.stat-card .lbl { font-size: 0.75rem; color: var(--muted); font-weight: 700; margin-top: 2px; }
+.val-compare { color: var(--accent); }
+.val-swap { color: var(--accent2); }
+.val-time { color: var(--gold); }
 
-  /* ARRAY DISPLAY */
-  .array-section {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 20px;
-    margin-bottom: 20px;
-  }
-  .array-title {
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 14px;
-  }
-  .balls-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: center;
-    align-items: flex-end;
-    min-height: 80px;
-  }
-  .ball-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    transition: all 0.4s;
-  }
-  .ball {
-    width: 52px;
-    height: 52px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 900;
-    font-size: 1.3rem;
-    color: #fff;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-    transition: all 0.4s cubic-bezier(.34,1.56,.64,1);
-    position: relative;
-  }
-  .ball.comparing {
-    outline: 3px solid var(--accent);
-    outline-offset: 3px;
-    transform: scale(1.15) translateY(-6px);
-  }
-  .ball.swapping {
-    outline: 3px solid var(--accent2);
-    outline-offset: 3px;
-    transform: scale(1.2) translateY(-10px);
-  }
-  .ball.sorted {
-    outline: 3px solid var(--green);
-    outline-offset: 3px;
-    opacity: 0.75;
-  }
-  .ball-idx {
-    font-size: 0.65rem;
-    color: var(--muted);
-    font-weight: 700;
-  }
+.message-box { background: var(--card2); border-left: 4px solid var(--accent); border-radius: 10px; padding: 10px 14px; font-size: 0.9rem; font-weight: 700; min-height: 44px; display: flex; align-items: center; margin-bottom: 16px; }
 
-  /* STEP LOG */
-  .log-section {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 16px;
-    margin-bottom: 20px;
-  }
-  .log-title {
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 10px;
-    display: flex;
-    justify-content: space-between;
-  }
-  .log-list {
-    max-height: 180px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  .log-entry {
-    font-size: 0.82rem;
-    padding: 6px 10px;
-    border-radius: 8px;
-    background: var(--card2);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .log-entry .tag {
-    font-size: 0.7rem;
-    font-weight: 800;
-    padding: 2px 7px;
-    border-radius: 5px;
-    flex-shrink: 0;
-  }
-  .tag-compare { background: #0ea5e9; color: #0f172a; }
-  .tag-swap { background: var(--accent2); color: #0f172a; }
-  .tag-pass { background: var(--gold); color: #0f172a; }
-  .tag-done { background: var(--green); color: #0f172a; }
+.scale-section { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 16px; }
+.section-title { font-size: 0.8rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; text-align: center; }
 
-  /* MESSAGE */
-  .message-box {
-    background: var(--card2);
-    border-left: 4px solid var(--accent);
-    border-radius: 10px;
-    padding: 10px 14px;
-    font-size: 0.9rem;
-    font-weight: 700;
-    min-height: 44px;
-    display: flex;
-    align-items: center;
-    margin-bottom: 20px;
-  }
+.pans-layout { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
 
-  /* STEP CONTROLS */
-  .step-controls {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
+.pan-zone { width: 120px; min-height: 120px; border: 3px dashed var(--border); border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s; }
+.pan-zone.over { border-color: var(--accent); background: rgba(56,189,248,0.1); }
+.pan-zone.filled-left { border-style: solid; border-color: var(--accent); }
+.pan-zone.filled-right { border-style: solid; border-color: var(--accent2); }
+.pan-empty-hint { font-size: 0.75rem; color: var(--border); text-align: center; line-height: 1.6; }
+.pan-ball { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.5rem; color: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
+.pan-pos { font-size: 0.72rem; color: var(--muted); font-weight: 700; }
 
-  /* HISTORY TABLE */
-  .history-section {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 16px;
-    margin-top: 20px;
-  }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.82rem;
-  }
-  th {
-    text-align: left;
-    padding: 6px 10px;
-    color: var(--muted);
-    font-weight: 700;
-    border-bottom: 1px solid var(--border);
-    font-size: 0.75rem;
-    text-transform: uppercase;
-  }
-  td {
-    padding: 6px 10px;
-    border-bottom: 1px solid var(--border);
-  }
-  tr:last-child td { border-bottom: none; }
-  .best { color: var(--green); font-weight: 800; }
+.scale-visual { display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0; }
+.scale-container { width: 90px; height: 80px; position: relative; }
+.scale-pole { position: absolute; left: 50%; top: 0; transform: translateX(-50%); width: 5px; height: 44px; background: #64748b; border-radius: 3px; }
+.scale-beam { position: absolute; top: 40px; left: 50%; transform: translateX(-50%) rotate(0deg); width: 76px; height: 6px; background: #64748b; border-radius: 3px; transition: transform 0.5s cubic-bezier(.34,1.56,.64,1); transform-origin: center center; }
+.scale-tick { position: absolute; top: 6px; width: 2px; height: 12px; background: #64748b; border-radius: 1px; }
+.scale-tick.left { left: 3px; }
+.scale-tick.right { right: 3px; }
+.scale-result-text { font-size: 0.85rem; font-weight: 700; text-align: center; min-height: 22px; padding: 2px 6px; }
 
-  @media (max-width: 480px) {
-    h1 { font-size: 1.5rem; }
-    .ball { width: 42px; height: 42px; font-size: 1rem; }
-  }
+.scale-actions { display: flex; gap: 10px; justify-content: center; }
+
+.array-section { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 16px; }
+.array-hint { font-size: 0.82rem; color: var(--muted); margin-bottom: 14px; }
+.balls-row { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+.ball-item { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.ball { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.3rem; color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.4); cursor: grab; transition: all 0.2s; user-select: none; outline-offset: 4px; }
+.ball:hover { transform: scale(1.12); filter: brightness(1.2); }
+.ball:active { cursor: grabbing; }
+.ball.dragging { opacity: 0.35; transform: scale(0.95); }
+.ball.on-left { outline: 3px solid var(--accent); }
+.ball.on-right { outline: 3px solid var(--accent2); }
+.ball.sorted { outline: 3px solid var(--green); opacity: 0.8; cursor: default; }
+.ball-idx { font-size: 0.68rem; color: var(--muted); font-weight: 700; }
+
+.target-section { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 12px 18px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.target-lbl { font-size: 0.8rem; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+
+.log-section { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 16px; }
+.log-title { font-size: 0.8rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; display: flex; justify-content: space-between; }
+.log-list { max-height: 160px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
+.log-entry { font-size: 0.82rem; padding: 6px 10px; border-radius: 8px; background: var(--card2); display: flex; align-items: center; gap: 8px; }
+.tag { font-size: 0.7rem; font-weight: 800; padding: 2px 7px; border-radius: 5px; flex-shrink: 0; }
+.tag-compare { background: #0ea5e9; color: #0f172a; }
+.tag-swap { background: var(--accent2); color: #0f172a; }
+.tag-done { background: var(--green); color: #0f172a; }
+
+.history-section { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; }
+table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+th { text-align: left; padding: 6px 10px; color: var(--muted); font-weight: 700; border-bottom: 1px solid var(--border); font-size: 0.75rem; text-transform: uppercase; }
+td { padding: 6px 10px; border-bottom: 1px solid var(--border); }
+tr:last-child td { border-bottom: none; }
+
+.win-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 99; }
+.win-banner { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); background: var(--card); border: 2px solid var(--green); border-radius: 20px; padding: 32px 40px; text-align: center; z-index: 100; box-shadow: 0 20px 60px rgba(0,0,0,0.8); min-width: 280px; }
+.win-banner h2 { font-size: 2rem; color: var(--green); -webkit-text-fill-color: var(--green); margin-bottom: 10px; }
+.win-stats { color: var(--muted); font-size: 0.95rem; line-height: 2.2; margin-bottom: 20px; }
+
+@media (max-width: 480px) {
+  h1 { font-size: 1.5rem; }
+  .ball { width: 46px; height: 46px; font-size: 1.1rem; }
+  .pan-zone { width: 100px; }
+}
 </style>
 </head>
 <body>
 
 <h1>⚖️ 排序模擬器</h1>
-<p class="subtitle">泡泡排序法 (Bubble Sort) 互動練習</p>
+<p class="subtitle">自由練習排序 — 用任何方式把球從小排到大！</p>
 
-<!-- CONTROLS -->
+<div class="instructions">
+  <div class="ititle">📋 操作說明</div>
+  <ol>
+    <li><b>第一步</b>：從下方「目前排列」，用滑鼠把一顆球 <b>拖曳</b> 到天平的 <b>左托盤</b></li>
+    <li><b>第二步</b>：再把另一顆球拖曳到天平的 <b>右托盤</b></li>
+    <li><b>第三步</b>：天平會傾斜 —— <b>較低的那側</b> 代表數字較大</li>
+    <li><b>第四步</b>：若需要交換，點 <b>「🔄 交換」</b>；不交換就繼續拖下一顆球</li>
+    <li><b>目標</b>：讓所有球從左到右由小排到大，完成排序即勝利！🎉</li>
+  </ol>
+  <div class="note">💡 可以用任何排序方法，系統會記錄你的比較次數與交換次數。</div>
+</div>
+
 <div class="controls">
   <div class="ctrl-group">
     <label>球數：</label>
@@ -392,66 +142,79 @@
       <option value="8">8 顆</option>
     </select>
   </div>
-  <div class="ctrl-group">
-    <label>速度：</label>
-    <input type="range" id="speed" min="200" max="2000" step="100" value="800">
-    <span id="speedLabel" style="font-size:0.8rem;color:var(--muted)">0.8s</span>
-  </div>
-  <button class="btn btn-primary" onclick="initSort()">🔀 重新產生</button>
-  <button class="btn btn-gold" onclick="autoPlay()" id="autoBtn">▶ 自動播放</button>
+  <button class="btn btn-primary" onclick="initGame()">🔀 重新產生</button>
 </div>
 
-<!-- STATS -->
 <div class="stats">
   <div class="stat-card">
     <div class="val val-compare" id="statCompare">0</div>
-    <div class="lbl">⚖️ 秤重次數</div>
+    <div class="lbl">⚖️ 比較次數</div>
   </div>
   <div class="stat-card">
     <div class="val val-swap" id="statSwap">0</div>
     <div class="lbl">🔄 交換次數</div>
   </div>
   <div class="stat-card">
-    <div class="val val-pass" id="statPass">0</div>
-    <div class="lbl">🔁 回合數</div>
-  </div>
-  <div class="stat-card">
-    <div class="val val-status" id="statStatus">準備中</div>
-    <div class="lbl">📊 狀態</div>
+    <div class="val val-time" id="statTime">00:00</div>
+    <div class="lbl">⏱️ 用時</div>
   </div>
 </div>
 
-<!-- MESSAGE -->
-<div class="message-box" id="msgBox">點選「重新產生」開始練習排序！</div>
+<div class="message-box" id="msgBox">把球拖曳到天平的左右托盤來開始比較！</div>
 
-<!-- SCALE -->
-<div class="scale-area">
-  <div class="scale-label">⚖️ 目前比較</div>
-  <div class="scale-container" id="scaleContainer">
-    <div class="scale-pole"></div>
-    <div class="scale-beam" id="scaleBeam">
-      <div class="scale-ball-on-pan left" id="scaleBallL" style="display:none"></div>
-      <div class="scale-ball-on-pan right" id="scaleBallR" style="display:none"></div>
+<div class="scale-section">
+  <div class="section-title">⚖️ 天平比較區 — 將球拖曳至左托盤或右托盤</div>
+  <div class="pans-layout">
+
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+      <div style="font-size:0.8rem;font-weight:800;color:var(--accent)">← 左托盤</div>
+      <div class="pan-zone" id="panLeft"
+           ondragover="onDragOverPan(event,'left')"
+           ondragleave="onDragLeavePan(event,'left')"
+           ondrop="onDropPan(event,'left')">
+        <div id="panLeftContent"><span class="pan-empty-hint">將球拖曳<br>至此</span></div>
+      </div>
     </div>
-    <div class="scale-pan scale-pan-left" id="panL"></div>
-    <div class="scale-pan scale-pan-right" id="panR"></div>
+
+    <div class="scale-visual">
+      <div class="scale-container">
+        <div class="scale-pole"></div>
+        <div class="scale-beam" id="scaleBeam">
+          <div class="scale-tick left"></div>
+          <div class="scale-tick right"></div>
+        </div>
+      </div>
+      <div class="scale-result-text" id="scaleResult">—</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+      <div style="font-size:0.8rem;font-weight:800;color:var(--accent2)">右托盤 →</div>
+      <div class="pan-zone" id="panRight"
+           ondragover="onDragOverPan(event,'right')"
+           ondragleave="onDragLeavePan(event,'right')"
+           ondrop="onDropPan(event,'right')">
+        <div id="panRightContent"><span class="pan-empty-hint">將球拖曳<br>至此</span></div>
+      </div>
+    </div>
+
   </div>
-  <div class="scale-result" id="scaleResult"></div>
+  <div class="scale-actions">
+    <button class="btn btn-muted" id="clearBtn" onclick="clearPans()" disabled>✕ 清除托盤</button>
+    <button class="btn btn-success" id="swapBtn" onclick="doSwap()" disabled>🔄 交換兩球位置</button>
+  </div>
 </div>
 
-<!-- ARRAY DISPLAY -->
 <div class="array-section">
-  <div class="array-title">🎱 目前排列</div>
+  <div class="section-title" style="text-align:left;margin-bottom:6px">🎱 目前排列</div>
+  <div class="array-hint">↓ 用滑鼠將球拖曳到上方天平的左托盤或右托盤</div>
   <div class="balls-row" id="ballsRow"></div>
 </div>
 
-<!-- STEP CONTROLS -->
-<div class="step-controls">
-  <button class="btn btn-success" id="stepBtn" onclick="nextStep()" disabled>➡️ 下一步</button>
-  <button class="btn btn-danger" onclick="initSort()">🔄 重置</button>
+<div class="target-section">
+  <span class="target-lbl">🎯 目標（由小到大）：</span>
+  <span id="targetDisplay" style="font-weight:800;font-size:1rem;letter-spacing:3px;color:var(--green)"></span>
 </div>
 
-<!-- LOG -->
 <div class="log-section">
   <div class="log-title">
     <span>📋 操作紀錄</span>
@@ -460,7 +223,6 @@
   <div class="log-list" id="logList"></div>
 </div>
 
-<!-- HISTORY -->
 <div class="history-section">
   <div class="log-title">
     <span>🏆 歷史紀錄</span>
@@ -468,274 +230,198 @@
   </div>
   <table>
     <thead>
-      <tr>
-        <th>#</th>
-        <th>球數</th>
-        <th>秤重次數</th>
-        <th>交換次數</th>
-        <th>回合數</th>
-        <th>時間</th>
-      </tr>
+      <tr><th>#</th><th>球數</th><th>比較次數</th><th>交換次數</th><th>用時</th><th>時間</th></tr>
     </thead>
     <tbody id="historyBody"></tbody>
   </table>
 </div>
 
+<div class="win-overlay" id="winOverlay" onclick="closeWin()"></div>
+<div class="win-banner" id="winBanner">
+  <h2>🎉 排序完成！</h2>
+  <div class="win-stats" id="winStats"></div>
+  <button class="btn btn-primary" onclick="closeWin(); initGame()">🔀 再玩一次</button>
+</div>
+
 <script>
-const COLORS = [
-  '#f43f5e','#f97316','#eab308','#22c55e',
-  '#06b6d4','#6366f1','#a855f7','#ec4899'
-];
+const COLORS = ['#f43f5e','#f97316','#eab308','#22c55e','#06b6d4','#6366f1','#a855f7','#ec4899'];
+let arr = [], panL = null, panR = null;
+let compareCount = 0, swapCount = 0;
+let startTime = null, timerInterval = null, gameDone = false;
+let history = JSON.parse(localStorage.getItem('sortHistoryFree') || '[]');
 
-let arr = [];
-let steps = [];
-let stepIdx = 0;
-let compareCount = 0;
-let swapCount = 0;
-let passCount = 0;
-let sortDone = false;
-let autoTimer = null;
-let history = JSON.parse(localStorage.getItem('sortHistory') || '[]');
-let startTime = null;
-
-const speed = document.getElementById('speed');
-speed.addEventListener('input', () => {
-  document.getElementById('speedLabel').textContent = (speed.value/1000).toFixed(1) + 's';
-});
+function startTimer() {
+  startTime = Date.now();
+  if (timerInterval) clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    const e = Math.floor((Date.now() - startTime) / 1000);
+    document.getElementById('statTime').textContent =
+      String(Math.floor(e/60)).padStart(2,'0') + ':' + String(e%60).padStart(2,'0');
+  }, 500);
+}
+function stopTimer() { if (timerInterval) { clearInterval(timerInterval); timerInterval = null; } }
+function elapsedStr() {
+  if (!startTime) return '00:00';
+  const e = Math.floor((Date.now() - startTime) / 1000);
+  return String(Math.floor(e/60)).padStart(2,'0') + ':' + String(e%60).padStart(2,'0');
+}
 
 function shuffle(a) {
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
+  for (let i = a.length-1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
   return a;
 }
+function isSorted() { for (let i=0;i<arr.length-1;i++) if (arr[i]>arr[i+1]) return false; return true; }
 
-function initSort() {
-  stopAuto();
+function initGame() {
+  stopTimer();
   const n = parseInt(document.getElementById('ballCount').value);
-  arr = shuffle([...Array(n)].map((_, i) => i + 1));
-  compareCount = 0; swapCount = 0; passCount = 0; sortDone = false;
-  steps = generateSteps([...arr]);
-  stepIdx = 0;
-  startTime = Date.now();
-  renderBalls(arr, [], [], []);
-  resetScale();
-  updateStats();
-  clearLog();
-  document.getElementById('stepBtn').disabled = false;
-  document.getElementById('msgBox').textContent = '✅ 已產生 ' + n + ' 顆球！點「下一步」開始比較，或「自動播放」。';
-  document.getElementById('statStatus').textContent = '進行中';
+  arr = shuffle([...Array(n)].map((_,i)=>i+1));
+  while (isSorted()) arr = shuffle([...arr]);
+  compareCount = 0; swapCount = 0; gameDone = false; panL = null; panR = null;
+  clearLog(); updateStats(); renderBalls(); resetScale();
+  setMsg('把球拖曳到天平的左右托盤來開始比較！');
+  document.getElementById('targetDisplay').textContent = Array.from({length:n},(_,i)=>i+1).join(' ＜ ');
+  document.getElementById('winBanner').style.display = 'none';
+  document.getElementById('winOverlay').style.display = 'none';
+  startTimer();
 }
 
-function generateSteps(a) {
-  const steps = [];
-  const n = a.length;
-  const sorted = new Set();
-  for (let pass = 0; pass < n - 1; pass++) {
-    steps.push({ type: 'pass', pass: pass + 1 });
-    let swapped = false;
-    for (let j = 0; j < n - 1 - pass; j++) {
-      steps.push({ type: 'compare', i: j, j: j + 1, arr: [...a], sorted: [...sorted] });
-      if (a[j] > a[j + 1]) {
-        [a[j], a[j + 1]] = [a[j + 1], a[j]];
-        steps.push({ type: 'swap', i: j, j: j + 1, arr: [...a], sorted: [...sorted] });
-        swapped = true;
-      }
-    }
-    sorted.add(n - 1 - pass);
-    steps.push({ type: 'passEnd', pass: pass + 1, sorted: [...sorted], arr: [...a] });
-    if (!swapped) break;
-  }
-  // mark all sorted
-  for (let k = 0; k < n; k++) sorted.add(k);
-  steps.push({ type: 'done', arr: [...a], sorted: [...sorted] });
-  return steps;
-}
-
-function nextStep() {
-  if (stepIdx >= steps.length) return;
-  const step = steps[stepIdx++];
-  applyStep(step);
-  if (sortDone) {
-    document.getElementById('stepBtn').disabled = true;
-    stopAuto();
-  }
-}
-
-function applyStep(step) {
-  if (step.type === 'pass') {
-    passCount++;
-    addLog('pass', `第 ${step.pass} 回合開始`);
-    updateStats();
-    document.getElementById('msgBox').textContent = `🔁 第 ${step.pass} 回合：從頭開始比較相鄰的球`;
-    renderBalls(step.arr || arr, [], [], []);
-    resetScale();
-  } else if (step.type === 'compare') {
-    compareCount++;
-    updateStats();
-    const left = step.arr[step.i], right = step.arr[step.j];
-    addLog('compare', `比較位置 ${step.i+1} (${left}) 和 位置 ${step.j+1} (${right})`);
-    document.getElementById('msgBox').innerHTML = `⚖️ 比較球 <b>${left}</b>（位置${step.i+1}）和球 <b>${right}</b>（位置${step.j+1}）`;
-    renderBalls(step.arr, [step.i, step.j], [], step.sorted);
-    showScale(left, right, step.i, step.j);
-  } else if (step.type === 'swap') {
-    swapCount++;
-    updateStats();
-    const left = step.arr[step.i], right = step.arr[step.j];
-    // arr reflects post-swap
-    addLog('swap', `交換 ${right}（位置${step.i+1}）↔ ${left}（位置${step.j+1}）`);
-    document.getElementById('msgBox').innerHTML = `🔄 球 <b>${right}</b> 比 <b>${left}</b> 小，交換位置！`;
-    renderBalls(step.arr, [], [step.i, step.j], step.sorted);
-    arr = [...step.arr];
-  } else if (step.type === 'passEnd') {
-    renderBalls(step.arr, [], [], step.sorted);
-    arr = [...step.arr];
-    resetScale();
-    document.getElementById('msgBox').textContent = `✅ 第 ${step.pass} 回合完成，最右邊的球已就位`;
-  } else if (step.type === 'done') {
-    sortDone = true;
-    renderBalls(step.arr, [], [], step.sorted);
-    arr = [...step.arr];
-    resetScale();
-    document.getElementById('msgBox').innerHTML = `🎉 排序完成！共秤重 <b>${compareCount}</b> 次，交換 <b>${swapCount}</b> 次，<b>${passCount}</b> 個回合`;
-    addLog('done', `排序完成！秤重 ${compareCount} 次 / 交換 ${swapCount} 次`);
-    document.getElementById('statStatus').textContent = '完成 🎉';
-    saveHistory();
-  }
-}
-
-function renderBalls(a, comparing, swapping, sortedArr) {
+function renderBalls() {
   const row = document.getElementById('ballsRow');
   row.innerHTML = '';
-  a.forEach((val, idx) => {
-    const item = document.createElement('div');
-    item.className = 'ball-item';
-    const ball = document.createElement('div');
-    ball.className = 'ball';
-    if (comparing.includes(idx)) ball.classList.add('comparing');
-    if (swapping.includes(idx)) ball.classList.add('swapping');
-    if (sortedArr && sortedArr.includes(idx)) ball.classList.add('sorted');
-    ball.style.background = COLORS[(val - 1) % COLORS.length];
-    ball.textContent = val;
-    const idx_label = document.createElement('div');
-    idx_label.className = 'ball-idx';
-    idx_label.textContent = idx + 1;
-    item.appendChild(ball);
-    item.appendChild(idx_label);
-    row.appendChild(item);
+  arr.forEach((val, idx) => {
+    const item = document.createElement('div'); item.className = 'ball-item';
+    const ball = document.createElement('div'); ball.className = 'ball';
+    ball.style.background = COLORS[(val-1)%COLORS.length]; ball.textContent = val;
+    if (!gameDone) {
+      ball.draggable = true; ball.dataset.index = idx;
+      ball.addEventListener('dragstart', e => onDragStart(e, idx));
+      ball.addEventListener('dragend', onDragEnd);
+      if (panL && panL.index === idx) ball.classList.add('on-left');
+      if (panR && panR.index === idx) ball.classList.add('on-right');
+    } else { ball.classList.add('sorted'); }
+    const lbl = document.createElement('div'); lbl.className = 'ball-idx';
+    lbl.textContent = '位置 '+(idx+1);
+    item.appendChild(ball); item.appendChild(lbl); row.appendChild(item);
   });
 }
 
-function showScale(leftVal, rightVal, li, ri) {
-  const beam = document.getElementById('scaleBeam');
-  const ballL = document.getElementById('scaleBallL');
-  const ballR = document.getElementById('scaleBallR');
-  const result = document.getElementById('scaleResult');
-  
-  ballL.style.display = 'flex';
-  ballR.style.display = 'flex';
-  ballL.textContent = leftVal;
-  ballR.textContent = rightVal;
-  ballL.style.background = COLORS[(leftVal - 1) % COLORS.length];
-  ballR.style.background = COLORS[(rightVal - 1) % COLORS.length];
-  
-  // tilt beam: left heavier → tilt left (negative angle)
-  let tilt = 0;
-  if (leftVal > rightVal) {
-    tilt = 12; // left side goes down
-    result.innerHTML = `<span style="color:var(--accent2)">球 ${leftVal} > 球 ${rightVal}，需要交換！</span>`;
-  } else if (leftVal < rightVal) {
-    tilt = -12;
-    result.innerHTML = `<span style="color:var(--green)">球 ${leftVal} < 球 ${rightVal}，不需交換 ✓</span>`;
+function onDragStart(e, index) {
+  e.dataTransfer.setData('text/plain', String(index)); e.dataTransfer.effectAllowed = 'copy';
+  setTimeout(() => { document.querySelectorAll('.ball').forEach(b => { if (parseInt(b.dataset.index)===index) b.classList.add('dragging'); }); }, 0);
+}
+function onDragEnd() { document.querySelectorAll('.ball').forEach(b => b.classList.remove('dragging')); }
+function onDragOverPan(e, side) { e.preventDefault(); e.dataTransfer.dropEffect='copy'; document.getElementById(side==='left'?'panLeft':'panRight').classList.add('over'); }
+function onDragLeavePan(e, side) { document.getElementById(side==='left'?'panLeft':'panRight').classList.remove('over'); }
+
+function onDropPan(e, side) {
+  e.preventDefault();
+  document.getElementById(side==='left'?'panLeft':'panRight').classList.remove('over');
+  const index = parseInt(e.dataTransfer.getData('text/plain'));
+  if (isNaN(index)||index<0||index>=arr.length) return;
+  const value = arr[index];
+  if (side==='left'  && panR && panR.index===index) { setMsg('⚠️ 這顆球已在右托盤！請選另一顆。'); return; }
+  if (side==='right' && panL && panL.index===index) { setMsg('⚠️ 這顆球已在左托盤！請選另一顆。'); return; }
+  if (side==='left') panL={index,value}; else panR={index,value};
+  renderPan('left', panL); renderPan('right', panR); renderBalls();
+  document.getElementById('clearBtn').disabled = false;
+  if (panL && panR) { compareCount++; updateStats(); updateScale(); addLog('compare',`比較 位置${panL.index+1}（球 ${panL.value}）和 位置${panR.index+1}（球 ${panR.value}）`); document.getElementById('swapBtn').disabled=false; }
+}
+
+function renderPan(side, state) {
+  const panEl  = document.getElementById(side==='left'?'panLeft':'panRight');
+  const contEl = document.getElementById(side==='left'?'panLeftContent':'panRightContent');
+  panEl.classList.remove('filled-left','filled-right');
+  if (state) {
+    panEl.classList.add(side==='left'?'filled-left':'filled-right');
+    const ball = document.createElement('div'); ball.className='pan-ball';
+    ball.style.background=COLORS[(state.value-1)%COLORS.length]; ball.textContent=state.value;
+    const pos = document.createElement('div'); pos.className='pan-pos'; pos.textContent='位置 '+(state.index+1);
+    contEl.innerHTML=''; contEl.appendChild(ball); contEl.appendChild(pos);
+  } else { contEl.innerHTML='<span class="pan-empty-hint">將球拖曳<br>至此</span>'; }
+}
+
+function updateScale() {
+  if (!panL||!panR) return;
+  const l=panL.value, r=panR.value;
+  const beam=document.getElementById('scaleBeam'), res=document.getElementById('scaleResult');
+  if (l>r) {
+    beam.style.transform='translateX(-50%) rotate(-15deg)';
+    res.innerHTML=`<span style="color:var(--accent2)">左邊 ${l} ＞ 右邊 ${r}，左側較重 ↙</span>`;
+    setMsg(`⚖️ 球 ${l}（位置${panL.index+1}）大於 球 ${r}（位置${panR.index+1}）— 需要交換嗎？`);
+  } else if (l<r) {
+    beam.style.transform='translateX(-50%) rotate(15deg)';
+    res.innerHTML=`<span style="color:var(--green)">左邊 ${l} ＜ 右邊 ${r}，右側較重 ↘</span>`;
+    setMsg(`⚖️ 球 ${l}（位置${panL.index+1}）小於 球 ${r}（位置${panR.index+1}）— 順序正確，不需交換！`);
   } else {
-    tilt = 0;
-    result.innerHTML = `<span style="color:var(--muted)">兩球相等，不需交換</span>`;
+    beam.style.transform='translateX(-50%) rotate(0deg)';
+    res.innerHTML=`<span style="color:var(--muted)">兩球相等，天平平衡</span>`;
+    setMsg(`⚖️ 兩球數值相同，不需要交換。`);
   }
-  beam.style.transform = `translateX(-50%) rotate(${tilt}deg)`;
 }
 
 function resetScale() {
-  document.getElementById('scaleBeam').style.transform = 'translateX(-50%) rotate(0deg)';
-  document.getElementById('scaleBallL').style.display = 'none';
-  document.getElementById('scaleBallR').style.display = 'none';
-  document.getElementById('scaleResult').textContent = '';
+  document.getElementById('scaleBeam').style.transform='translateX(-50%) rotate(0deg)';
+  document.getElementById('scaleResult').textContent='—';
+  renderPan('left',null); renderPan('right',null);
+  document.getElementById('swapBtn').disabled=true; document.getElementById('clearBtn').disabled=true;
 }
 
-function updateStats() {
-  document.getElementById('statCompare').textContent = compareCount;
-  document.getElementById('statSwap').textContent = swapCount;
-  document.getElementById('statPass').textContent = passCount;
+function doSwap() {
+  if (!panL||!panR) return;
+  const li=panL.index,ri=panR.index,lv=panL.value,rv=panR.value;
+  [arr[li],arr[ri]]=[arr[ri],arr[li]];
+  swapCount++; updateStats();
+  addLog('swap',`交換 位置${li+1}（球 ${lv}）↔ 位置${ri+1}（球 ${rv}）`);
+  setMsg(`🔄 已交換！球 ${lv} 移到位置${ri+1}，球 ${rv} 移到位置${li+1}`);
+  panL=null; panR=null; resetScale(); renderBalls(); checkWin();
 }
+
+function clearPans() { panL=null; panR=null; resetScale(); renderBalls(); setMsg('托盤已清除，繼續拖曳球來比較。'); }
+
+function checkWin() {
+  if (!isSorted()) return;
+  gameDone=true; stopTimer();
+  const t=elapsedStr();
+  addLog('done',`排序完成！比較 ${compareCount} 次，交換 ${swapCount} 次，用時 ${t}`);
+  setMsg(`🎉 排序完成！比較 ${compareCount} 次，交換 ${swapCount} 次，用時 ${t}`);
+  saveHistory(); renderBalls();
+  document.getElementById('winStats').innerHTML=`⚖️ 比較次數：${compareCount} 次<br>🔄 交換次數：${swapCount} 次<br>⏱️ 用時：${t}`;
+  document.getElementById('winBanner').style.display='block';
+  document.getElementById('winOverlay').style.display='block';
+}
+function closeWin() { document.getElementById('winBanner').style.display='none'; document.getElementById('winOverlay').style.display='none'; }
+
+function updateStats() { document.getElementById('statCompare').textContent=compareCount; document.getElementById('statSwap').textContent=swapCount; }
+function setMsg(text) { document.getElementById('msgBox').innerHTML=text; }
 
 function addLog(type, msg) {
-  const list = document.getElementById('logList');
-  const entry = document.createElement('div');
-  entry.className = 'log-entry';
-  const tag = document.createElement('span');
-  tag.className = 'tag';
-  if (type === 'compare') { tag.className += ' tag-compare'; tag.textContent = '秤重'; }
-  else if (type === 'swap') { tag.className += ' tag-swap'; tag.textContent = '交換'; }
-  else if (type === 'pass') { tag.className += ' tag-pass'; tag.textContent = '回合'; }
-  else { tag.className += ' tag-done'; tag.textContent = '完成'; }
-  entry.appendChild(tag);
-  entry.appendChild(document.createTextNode(msg));
-  list.appendChild(entry);
-  list.scrollTop = list.scrollHeight;
-  document.getElementById('logCount').textContent = list.children.length + ' 筆';
+  const list=document.getElementById('logList');
+  const entry=document.createElement('div'); entry.className='log-entry';
+  const tag=document.createElement('span'); tag.className='tag';
+  if (type==='compare'){tag.classList.add('tag-compare');tag.textContent='比較';}
+  else if (type==='swap'){tag.classList.add('tag-swap');tag.textContent='交換';}
+  else{tag.classList.add('tag-done');tag.textContent='完成';}
+  entry.appendChild(tag); entry.appendChild(document.createTextNode(' '+msg));
+  list.appendChild(entry); list.scrollTop=list.scrollHeight;
+  document.getElementById('logCount').textContent=list.children.length+' 筆';
 }
-
-function clearLog() {
-  document.getElementById('logList').innerHTML = '';
-  document.getElementById('logCount').textContent = '0 筆';
-}
-
-function autoPlay() {
-  if (sortDone) { initSort(); return; }
-  if (autoTimer) { stopAuto(); return; }
-  document.getElementById('autoBtn').textContent = '⏸ 暫停';
-  autoTimer = setInterval(() => {
-    if (stepIdx >= steps.length || sortDone) {
-      stopAuto();
-      return;
-    }
-    nextStep();
-  }, parseInt(speed.value));
-}
-
-function stopAuto() {
-  if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
-  document.getElementById('autoBtn').textContent = '▶ 自動播放';
-}
+function clearLog() { document.getElementById('logList').innerHTML=''; document.getElementById('logCount').textContent='0 筆'; }
 
 function saveHistory() {
-  const n = parseInt(document.getElementById('ballCount').value);
-  const elapsed = Math.round((Date.now() - startTime) / 1000);
-  history.unshift({ n, compare: compareCount, swap: swapCount, pass: passCount, time: new Date().toLocaleTimeString('zh-TW'), elapsed });
-  if (history.length > 20) history = history.slice(0, 20);
-  localStorage.setItem('sortHistory', JSON.stringify(history));
-  renderHistory();
+  const n=parseInt(document.getElementById('ballCount').value);
+  history.unshift({n,compare:compareCount,swap:swapCount,elapsed:elapsedStr(),time:new Date().toLocaleTimeString('zh-TW')});
+  if (history.length>20) history=history.slice(0,20);
+  localStorage.setItem('sortHistoryFree',JSON.stringify(history)); renderHistory();
 }
-
 function renderHistory() {
-  const tbody = document.getElementById('historyBody');
-  tbody.innerHTML = '';
-  history.forEach((h, i) => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${i + 1}</td><td>${h.n}</td><td>${h.compare}</td><td>${h.swap}</td><td>${h.pass}</td><td>${h.time}</td>`;
-    tbody.appendChild(tr);
-  });
+  const tbody=document.getElementById('historyBody'); tbody.innerHTML='';
+  history.forEach((h,i)=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${i+1}</td><td>${h.n} 顆</td><td>${h.compare}</td><td>${h.swap}</td><td>${h.elapsed||'-'}</td><td>${h.time}</td>`; tbody.appendChild(tr); });
 }
+function clearHistory() { history=[]; localStorage.removeItem('sortHistoryFree'); renderHistory(); }
 
-function clearHistory() {
-  history = [];
-  localStorage.removeItem('sortHistory');
-  renderHistory();
-}
-
-// Init
 renderHistory();
-initSort();
+initGame();
 </script>
 </body>
 </html>
