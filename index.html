@@ -126,9 +126,9 @@ tr:last-child td { border-bottom: none; }
     <li><b>第二步</b>：再把另一顆球拖曳到天平的 <b>右托盤</b></li>
     <li><b>第三步</b>：天平會傾斜 —— <b>較低的那側</b> 代表數字較大</li>
     <li><b>第四步</b>：若需要交換，點 <b>「🔄 交換」</b>；不交換就繼續拖下一顆球</li>
-    <li><b>目標</b>：讓所有球從左到右由小排到大，完成排序即勝利！🎉</li>
+    <li><b>目標</b>：讓所有球從左到右<b>由輕排到重</b>，完成排序即勝利！🎉</li>
   </ol>
-  <div class="note">💡 可以用任何排序方法，系統會記錄你的比較次數與交換次數。</div>
+  <div class="note">💡 球上只顯示代號（A、B、C…），重量需靠天平比較才能知道。可以用任何排序策略！</div>
 </div>
 
 <div class="controls">
@@ -211,8 +211,8 @@ tr:last-child td { border-bottom: none; }
 </div>
 
 <div class="target-section">
-  <span class="target-lbl">🎯 目標（由小到大）：</span>
-  <span id="targetDisplay" style="font-weight:800;font-size:1rem;letter-spacing:3px;color:var(--green)"></span>
+  <span class="target-lbl">🎯 目標：</span>
+  <span id="targetDisplay" style="font-weight:800;font-size:1rem;letter-spacing:2px;color:var(--muted)"></span>
 </div>
 
 <div class="log-section">
@@ -245,7 +245,11 @@ tr:last-child td { border-bottom: none; }
 
 <script>
 const COLORS = ['#f43f5e','#f97316','#eab308','#22c55e','#06b6d4','#6366f1','#a855f7','#ec4899'];
+const BALL_LABELS = ['A','B','C','D','E','F','G','H'];
 let arr = [], panL = null, panR = null;
+// arr stores weights (1..n) in shuffled positions.
+// labelOf[weight] = letter shown on that ball (randomly assigned, hides numeric identity)
+let labelOf = {};
 let compareCount = 0, swapCount = 0;
 let startTime = null, timerInterval = null, gameDone = false;
 let history = JSON.parse(localStorage.getItem('sortHistoryFree') || '[]');
@@ -277,10 +281,14 @@ function initGame() {
   const n = parseInt(document.getElementById('ballCount').value);
   arr = shuffle([...Array(n)].map((_,i)=>i+1));
   while (isSorted()) arr = shuffle([...arr]);
+  // Randomly assign letters to weights so numbers are completely hidden
+  const shuffledLabels = shuffle([...BALL_LABELS.slice(0, n)]);
+  labelOf = {};
+  for (let w = 1; w <= n; w++) labelOf[w] = shuffledLabels[w-1];
   compareCount = 0; swapCount = 0; gameDone = false; panL = null; panR = null;
   clearLog(); updateStats(); renderBalls(); resetScale();
   setMsg('把球拖曳到天平的左右托盤來開始比較！');
-  document.getElementById('targetDisplay').textContent = Array.from({length:n},(_,i)=>i+1).join(' ＜ ');
+  document.getElementById('targetDisplay').textContent = '？ ＜ ？ ＜ ？（由輕到重排列）';
   document.getElementById('winBanner').style.display = 'none';
   document.getElementById('winOverlay').style.display = 'none';
   startTimer();
@@ -292,7 +300,7 @@ function renderBalls() {
   arr.forEach((val, idx) => {
     const item = document.createElement('div'); item.className = 'ball-item';
     const ball = document.createElement('div'); ball.className = 'ball';
-    ball.style.background = COLORS[(val-1)%COLORS.length]; ball.textContent = val;
+    ball.style.background = COLORS[(val-1)%COLORS.length]; ball.textContent = labelOf[val];
     if (!gameDone) {
       ball.draggable = true; ball.dataset.index = idx;
       ball.addEventListener('dragstart', e => onDragStart(e, idx));
@@ -325,7 +333,7 @@ function onDropPan(e, side) {
   if (side==='left') panL={index,value}; else panR={index,value};
   renderPan('left', panL); renderPan('right', panR); renderBalls();
   document.getElementById('clearBtn').disabled = false;
-  if (panL && panR) { compareCount++; updateStats(); updateScale(); addLog('compare',`比較 位置${panL.index+1}（球 ${panL.value}）和 位置${panR.index+1}（球 ${panR.value}）`); document.getElementById('swapBtn').disabled=false; }
+  if (panL && panR) { compareCount++; updateStats(); updateScale(); addLog('compare',`比較 球${labelOf[panL.value]}（位置${panL.index+1}）和 球${labelOf[panR.value]}（位置${panR.index+1}）`); document.getElementById('swapBtn').disabled=false; }
 }
 
 function renderPan(side, state) {
@@ -335,7 +343,7 @@ function renderPan(side, state) {
   if (state) {
     panEl.classList.add(side==='left'?'filled-left':'filled-right');
     const ball = document.createElement('div'); ball.className='pan-ball';
-    ball.style.background=COLORS[(state.value-1)%COLORS.length]; ball.textContent=state.value;
+    ball.style.background=COLORS[(state.value-1)%COLORS.length]; ball.textContent=labelOf[state.value];
     const pos = document.createElement('div'); pos.className='pan-pos'; pos.textContent='位置 '+(state.index+1);
     contEl.innerHTML=''; contEl.appendChild(ball); contEl.appendChild(pos);
   } else { contEl.innerHTML='<span class="pan-empty-hint">將球拖曳<br>至此</span>'; }
@@ -345,18 +353,19 @@ function updateScale() {
   if (!panL||!panR) return;
   const l=panL.value, r=panR.value;
   const beam=document.getElementById('scaleBeam'), res=document.getElementById('scaleResult');
+  const lLabel = labelOf[l], rLabel = labelOf[r];
   if (l>r) {
     beam.style.transform='translateX(-50%) rotate(-15deg)';
-    res.innerHTML=`<span style="color:var(--accent2)">左邊 ${l} ＞ 右邊 ${r}，左側較重 ↙</span>`;
-    setMsg(`⚖️ 球 ${l}（位置${panL.index+1}）大於 球 ${r}（位置${panR.index+1}）— 需要交換嗎？`);
+    res.innerHTML=`<span style="color:var(--accent2)">球 ${lLabel} 較重 ↙，球 ${rLabel} 較輕</span>`;
+    setMsg(`⚖️ 球 ${lLabel}（位置${panL.index+1}）比 球 ${rLabel}（位置${panR.index+1}）重 — 需要交換嗎？`);
   } else if (l<r) {
     beam.style.transform='translateX(-50%) rotate(15deg)';
-    res.innerHTML=`<span style="color:var(--green)">左邊 ${l} ＜ 右邊 ${r}，右側較重 ↘</span>`;
-    setMsg(`⚖️ 球 ${l}（位置${panL.index+1}）小於 球 ${r}（位置${panR.index+1}）— 順序正確，不需交換！`);
+    res.innerHTML=`<span style="color:var(--green)">球 ${lLabel} 較輕，球 ${rLabel} 較重 ↘</span>`;
+    setMsg(`⚖️ 球 ${lLabel}（位置${panL.index+1}）比 球 ${rLabel}（位置${panR.index+1}）輕 — 順序正確，不需交換！`);
   } else {
     beam.style.transform='translateX(-50%) rotate(0deg)';
-    res.innerHTML=`<span style="color:var(--muted)">兩球相等，天平平衡</span>`;
-    setMsg(`⚖️ 兩球數值相同，不需要交換。`);
+    res.innerHTML=`<span style="color:var(--muted)">兩球一樣重，天平平衡</span>`;
+    setMsg(`⚖️ 兩球一樣重，不需要交換。`);
   }
 }
 
@@ -372,8 +381,8 @@ function doSwap() {
   const li=panL.index,ri=panR.index,lv=panL.value,rv=panR.value;
   [arr[li],arr[ri]]=[arr[ri],arr[li]];
   swapCount++; updateStats();
-  addLog('swap',`交換 位置${li+1}（球 ${lv}）↔ 位置${ri+1}（球 ${rv}）`);
-  setMsg(`🔄 已交換！球 ${lv} 移到位置${ri+1}，球 ${rv} 移到位置${li+1}`);
+  addLog('swap',`交換 球${labelOf[lv]}（位置${li+1}）↔ 球${labelOf[rv]}（位置${ri+1}）`);
+  setMsg(`🔄 已交換！球 ${labelOf[lv]} 移到位置${ri+1}，球 ${labelOf[rv]} 移到位置${li+1}`);
   panL=null; panR=null; resetScale(); renderBalls(); checkWin();
 }
 
@@ -383,10 +392,13 @@ function checkWin() {
   if (!isSorted()) return;
   gameDone=true; stopTimer();
   const t=elapsedStr();
-  addLog('done',`排序完成！比較 ${compareCount} 次，交換 ${swapCount} 次，用時 ${t}`);
+  const order = arr.map(w=>`球${labelOf[w]}`).join('＜');
+  addLog('done',`排序完成！${order}，比較 ${compareCount} 次，交換 ${swapCount} 次，用時 ${t}`);
   setMsg(`🎉 排序完成！比較 ${compareCount} 次，交換 ${swapCount} 次，用時 ${t}`);
   saveHistory(); renderBalls();
-  document.getElementById('winStats').innerHTML=`⚖️ 比較次數：${compareCount} 次<br>🔄 交換次數：${swapCount} 次<br>⏱️ 用時：${t}`;
+  // Reveal the correct order
+  const revealOrder = arr.map(w => `球${labelOf[w]}`).join(' ＜ ');
+  document.getElementById('winStats').innerHTML=`⚖️ 比較次數：${compareCount} 次<br>🔄 交換次數：${swapCount} 次<br>⏱️ 用時：${t}<br><span style="color:var(--green);font-size:0.85rem">正確排列：${revealOrder}</span>`;
   document.getElementById('winBanner').style.display='block';
   document.getElementById('winOverlay').style.display='block';
 }
