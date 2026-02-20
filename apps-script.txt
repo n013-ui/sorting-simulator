@@ -1,0 +1,63 @@
+===== Google Apps Script 設定說明 =====
+
+【步驟】
+
+1. 前往 Google 試算表，建立一個新試算表
+   （命名例如：「排序法測驗成績」）
+
+2. 點上方選單「延伸功能」→「Apps Script」
+
+3. 刪除原本的程式碼，貼上以下程式碼：
+
+─────────────────────────────────────────────
+
+function doPost(e) {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    let sheet = ss.getSheetByName('成績紀錄');
+    if (!sheet) {
+      sheet = ss.insertSheet('成績紀錄');
+      sheet.appendRow(['時間','科目','班級','座號','姓名','得分','總分','正確率(%)','用時','原始資料']);
+      sheet.getRange(1,1,1,10).setFontWeight('bold').setBackground('#f3f4f6');
+    }
+    const d = JSON.parse(e.postData.contents);
+    sheet.appendRow([
+      Utilities.formatDate(new Date(), 'Asia/Taipei', 'yyyy/MM/dd HH:mm:ss'),
+      d.subject, d.class, d.seat, d.name,
+      d.score, d.total, d.pct, d.elapsed, d.original
+    ]);
+    return ContentService.createTextOutput('ok');
+  } catch(err) {
+    return ContentService.createTextOutput('err:' + err.toString());
+  }
+}
+
+function doGet(e) {
+  return ContentService.createTextOutput('排序法測驗成績收集系統');
+}
+
+─────────────────────────────────────────────
+
+4. 點「儲存」（Ctrl+S）
+
+5. 點右上角「部署」→「新增部署作業」
+   - 類型：選「網頁應用程式」
+   - 執行身份：選「我（自己的帳號）」
+   - 存取權：選「所有人」
+   - 點「部署」
+
+6. 複製「網頁應用程式 URL」（格式如下）：
+   https://script.google.com/macros/s/XXXXXXXX/exec
+
+7. 將此 URL 貼到三個測驗 HTML 的第一行設定：
+   const SHEET_URL = '貼在這裡';
+
+   ➤ insertion-sort.html（插入排序法）
+   ➤ bubble-sort.html（氣泡排序法）
+   ➤ selection-sort.html（選擇排序法）
+
+8. 重新推送到 GitHub（或請 Claude 幫你推送）
+
+===== 完成！=====
+學生交卷後，成績會自動出現在試算表的「成績紀錄」工作表中。
+欄位：時間 / 科目 / 班級 / 座號 / 姓名 / 得分 / 總分 / 正確率 / 用時 / 原始資料

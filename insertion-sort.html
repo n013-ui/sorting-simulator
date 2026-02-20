@@ -3,404 +3,350 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>插入排序法練習</title>
+<title>插入排序法 — 課堂測驗</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<!--
+===== 老師設定說明 =====
+1. 前往你的 Google 試算表 → 「延伸功能」→「Apps Script」
+2. 貼上 apps-script.txt 裡的程式碼，部署為 Web 應用程式
+3. 將部署網址貼到下方 SHEET_URL 變數（第 3 行 script）
+========================
+-->
 <style>
 :root {
-  --bg: #0f172a; --card: #1e293b; --card2: #273449;
-  --accent: #38bdf8; --accent2: #f472b6; --gold: #fbbf24;
-  --green: #4ade80; --red: #f87171; --text: #e2e8f0;
-  --muted: #94a3b8; --border: #334155;
+  --bg:#0f172a;--card:#1e293b;--card2:#273449;
+  --accent:#38bdf8;--accent2:#f472b6;--gold:#fbbf24;
+  --green:#4ade80;--red:#f87171;--text:#e2e8f0;--muted:#94a3b8;--border:#334155;
+  --purple:#818cf8;
 }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 16px; }
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:16px;}
+h1{text-align:center;font-size:1.9rem;font-weight:900;background:linear-gradient(135deg,var(--purple),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px;}
+.subtitle{text-align:center;color:var(--muted);font-size:0.88rem;margin-bottom:20px;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:16px;}
 
-h1 { text-align: center; font-size: 2rem; font-weight: 900; background: linear-gradient(135deg, #818cf8, var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 4px; }
-.subtitle { text-align: center; color: var(--muted); font-size: 0.9rem; margin-bottom: 20px; }
+/* Info phase */
+.info-card{max-width:420px;margin:40px auto;}
+.info-card h2{font-size:1.3rem;font-weight:800;margin-bottom:6px;color:var(--purple);}
+.info-card p{font-size:0.85rem;color:var(--muted);margin-bottom:20px;}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:0.82rem;font-weight:700;color:var(--muted);margin-bottom:5px;}
+.field input{width:100%;background:var(--card2);border:2px solid var(--border);color:var(--text);border-radius:10px;padding:10px 14px;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:700;outline:none;}
+.field input:focus{border-color:var(--purple);}
 
-.card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 18px; margin-bottom: 16px; }
+/* Buttons */
+.btn{padding:10px 22px;border-radius:10px;border:none;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.95rem;cursor:pointer;transition:all .15s;}
+.btn:hover{transform:translateY(-2px);filter:brightness(1.15);}
+.btn:active{transform:translateY(0);}
+.btn-start{background:var(--purple);color:#fff;width:100%;font-size:1.05rem;padding:12px;}
+.btn-submit{background:var(--green);color:#0f172a;font-size:1rem;padding:11px 28px;}
+.btn-retry{background:var(--purple);color:#fff;}
+.btn-sm{padding:5px 12px;font-size:0.78rem;border-radius:8px;}
+.btn:disabled{opacity:.35;cursor:not-allowed;transform:none!important;filter:none!important;}
+
+/* Student bar */
+.student-bar{display:flex;gap:16px;flex-wrap:wrap;align-items:center;justify-content:space-between;}
+.student-info-chips{display:flex;gap:8px;flex-wrap:wrap;}
+.chip{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:4px 12px;font-size:0.82rem;font-weight:700;}
+.chip span{color:var(--muted);font-weight:400;margin-right:4px;}
+.timer-box{font-size:1.1rem;font-weight:900;color:var(--gold);}
 
 /* Controls */
-.controls { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; }
-.ctrl-group { display: flex; align-items: center; gap: 8px; }
-.ctrl-group label { font-size: 0.85rem; color: var(--muted); font-weight: 700; }
-select { background: var(--card2); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 6px 10px; font-family: 'Nunito', sans-serif; font-size: 0.9rem; cursor: pointer; }
-.btn { padding: 8px 18px; border-radius: 10px; border: none; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.9rem; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
-.btn:hover { transform: translateY(-2px); filter: brightness(1.15); }
-.btn:active { transform: translateY(0); }
-.btn-primary { background: #818cf8; color: #fff; }
-.btn-gold { background: var(--gold); color: #0f172a; }
-.btn-success { background: var(--green); color: #0f172a; }
-.btn-danger { background: var(--red); color: #0f172a; }
-.btn-muted { background: var(--card2); color: var(--muted); border: 1px solid var(--border); }
-.btn-sm { padding: 5px 12px; font-size: 0.8rem; }
-.btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none !important; filter: none !important; }
-
-/* Score bar */
-.score-bar { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
-.score-item { text-align: center; }
-.score-item .val { font-size: 1.8rem; font-weight: 900; line-height: 1; }
-.score-item .lbl { font-size: 0.75rem; color: var(--muted); font-weight: 700; }
-.val-ok { color: var(--green); }
-.val-total { color: var(--accent); }
-.val-pct { color: var(--gold); }
-
-/* Algorithm hint */
-.algo-hint { background: var(--card2); border-left: 3px solid #818cf8; border-radius: 10px; padding: 10px 14px; font-size: 0.85rem; color: var(--muted); line-height: 1.6; }
-.algo-hint b { color: var(--text); }
+.controls-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+select{background:var(--card2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:6px 10px;font-family:'Nunito',sans-serif;font-size:0.88rem;cursor:pointer;}
 
 /* Table */
-.table-wrap { overflow-x: auto; }
-table.sort-table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
-.sort-table th { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); font-weight: 700; padding: 4px 8px; text-align: center; }
-.sort-table td { padding: 0 4px; vertical-align: middle; }
-.sort-table td.row-label { font-size: 0.88rem; font-weight: 800; color: var(--muted); white-space: nowrap; padding-right: 10px; }
-.sort-table td.row-label.original { color: var(--accent); }
-.sort-table td.row-label.round { color: var(--text); }
-.sort-table td.key-hint { font-size: 0.78rem; color: var(--muted); padding-left: 8px; white-space: nowrap; }
-.sort-table td.actions { padding-left: 8px; white-space: nowrap; }
+.table-wrap{overflow-x:auto;}
+table.sort-table{width:100%;border-collapse:separate;border-spacing:0 7px;}
+.sort-table th{font-size:0.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700;padding:3px 6px;text-align:center;}
+.sort-table td{padding:0 4px;vertical-align:middle;}
+.row-label{font-size:.85rem;font-weight:800;white-space:nowrap;padding-right:10px!important;}
+.lbl-orig{color:var(--accent);}
+.lbl-round{color:var(--text);}
+.hint-cell{font-size:.75rem;color:var(--gold);padding-left:8px!important;white-space:nowrap;}
 
-/* Data cells (original) */
-.data-cell {
-  width: 52px; height: 52px; border-radius: 12px;
-  display: inline-flex; align-items: center; justify-content: center;
-  font-size: 1.3rem; font-weight: 900; color: #fff;
-  background: var(--card2); box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-  border: 2px solid var(--border);
-}
-.data-cell.key-cell { border-color: var(--gold); box-shadow: 0 0 10px rgba(251,191,36,0.4); }
+/* Data cells */
+.data-cell{width:50px;height:50px;border-radius:11px;display:inline-flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:900;color:#fff;background:var(--card2);border:2px solid var(--border);}
 
 /* Input cells */
-.input-wrap { display: inline-block; }
-.sort-input {
-  width: 52px; height: 52px; border-radius: 12px;
-  background: var(--card2); border: 2px solid var(--border);
-  color: var(--text); font-family: 'Nunito', sans-serif;
-  font-size: 1.2rem; font-weight: 900;
-  text-align: center; outline: none; cursor: text;
-  transition: border-color 0.2s, background 0.2s;
-  -moz-appearance: textfield;
-}
-.sort-input::-webkit-outer-spin-button,
-.sort-input::-webkit-inner-spin-button { -webkit-appearance: none; }
-.sort-input:focus { border-color: #818cf8; background: #1e1b4b; }
-.sort-input.correct { background: rgba(74,222,128,0.15); border-color: var(--green); color: var(--green); }
-.sort-input.incorrect { background: rgba(248,113,113,0.15); border-color: var(--red); color: var(--red); }
-.sort-input.revealed { background: rgba(56,189,248,0.12); border-color: var(--accent); color: var(--accent); }
-.sort-input:disabled { cursor: default; opacity: 1; }
+.sort-input{width:50px;height:50px;border-radius:11px;background:var(--card2);border:2px solid var(--border);color:var(--text);font-family:'Nunito',sans-serif;font-size:1.1rem;font-weight:900;text-align:center;outline:none;-moz-appearance:textfield;}
+.sort-input::-webkit-outer-spin-button,.sort-input::-webkit-inner-spin-button{-webkit-appearance:none;}
+.sort-input:focus{border-color:var(--purple);background:#1e1b4b;}
+.sort-input.correct{background:rgba(74,222,128,.15);border-color:var(--green);color:var(--green);}
+.sort-input.incorrect{background:rgba(248,113,113,.15);border-color:var(--red);color:var(--red);}
+.sort-input:disabled{cursor:default;opacity:1;}
 
-/* Row state indicator */
-.row-status { font-size: 0.85rem; font-weight: 800; min-width: 28px; display: inline-block; }
-.row-status.ok { color: var(--green); }
-.row-status.partial { color: var(--gold); }
-.row-status.wrong { color: var(--red); }
-.row-status.revealed { color: var(--accent); }
+/* Score */
+.score-big{text-align:center;padding:10px 0;}
+.score-num{font-size:3rem;font-weight:900;color:var(--green);line-height:1;}
+.score-sub{font-size:0.95rem;color:var(--muted);margin-top:4px;}
+.score-pct{font-size:1.5rem;font-weight:900;color:var(--gold);}
 
-/* Result message */
-.result-msg { text-align: center; font-weight: 800; font-size: 1rem; min-height: 32px; padding: 6px; }
-.result-msg.win { color: var(--green); }
-.result-msg.partial { color: var(--gold); }
+/* Submit status */
+.submit-status{text-align:center;font-size:.9rem;font-weight:700;padding:8px;min-height:32px;}
+.submit-status.ok{color:var(--green);}
+.submit-status.err{color:var(--red);}
+.submit-status.pending{color:var(--gold);}
 
-/* Ans all top */
-.top-actions { display: flex; gap: 10px; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+/* Warning */
+.warn-box{background:rgba(248,113,113,.1);border:1px solid var(--red);border-radius:10px;padding:10px 14px;font-size:.85rem;color:var(--red);margin-bottom:12px;display:none;}
 
-@media (max-width: 600px) {
-  .data-cell, .sort-input { width: 42px; height: 42px; font-size: 1rem; border-radius: 10px; }
-  h1 { font-size: 1.5rem; }
+@media(max-width:500px){
+  .data-cell,.sort-input{width:40px;height:40px;font-size:.95rem;}
+  h1{font-size:1.4rem;}
 }
 </style>
 </head>
 <body>
 
-<h1>📝 插入排序法練習</h1>
-<p class="subtitle">每一輪結束後，填入陣列的排列狀態</p>
+<!-- ── Phase 1: Student Info ── -->
+<div id="phaseInfo">
+  <h1>📝 插入排序法測驗</h1>
+  <p class="subtitle">請先輸入您的資料，再開始作答</p>
+  <div class="card info-card">
+    <h2>學生資料</h2>
+    <p>請確認資料正確，開始後無法修改</p>
+    <div class="field"><label>班級</label><input type="text" id="inputClass" placeholder="例如：303" maxlength="20" autocomplete="off"></div>
+    <div class="field"><label>座號</label><input type="text" id="inputSeat" placeholder="例如：12" maxlength="5" autocomplete="off"></div>
+    <div class="field"><label>姓名</label><input type="text" id="inputName" placeholder="請輸入真實姓名" maxlength="20" autocomplete="off"></div>
+    <div class="warn-box" id="infoWarn">請填寫所有欄位</div>
+    <button class="btn btn-start" onclick="startTest()">開始測驗 →</button>
+  </div>
+</div>
 
-<!-- Controls -->
-<div class="card">
-  <div class="controls">
-    <div class="ctrl-group">
-      <label>數字個數：</label>
+<!-- ── Phase 2: Test ── -->
+<div id="phaseTest" style="display:none">
+  <h1>📝 插入排序法測驗</h1>
+  <div class="card">
+    <div class="student-bar">
+      <div class="student-info-chips">
+        <div class="chip"><span>班級</span><span id="showClass">—</span></div>
+        <div class="chip"><span>座號</span><span id="showSeat">—</span></div>
+        <div class="chip"><span>姓名</span><span id="showName">—</span></div>
+      </div>
+      <div class="timer-box">⏱️ <span id="timerDisplay">00:00</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="controls-row" style="margin-bottom:14px">
+      <label style="font-size:.82rem;color:var(--muted);font-weight:700">數字個數：</label>
       <select id="numCount" onchange="newQuestion()">
-        <option value="4">4 個</option>
-        <option value="5" selected>5 個</option>
-        <option value="6">6 個</option>
-        <option value="7">7 個</option>
+        <option value="4">4 個</option><option value="5" selected>5 個</option>
+        <option value="6">6 個</option><option value="7">7 個</option>
       </select>
+      <button class="btn btn-sm" style="background:var(--card2);color:var(--muted);border:1px solid var(--border)" onclick="newQuestion()">🔀 換題</button>
     </div>
-    <div class="ctrl-group">
-      <label>數字範圍：</label>
-      <select id="numRange">
-        <option value="20">1 – 20</option>
-        <option value="50">1 – 50</option>
-        <option value="99" selected>1 – 99</option>
-      </select>
+    <div class="table-wrap">
+      <table class="sort-table"><thead id="tHead"></thead><tbody id="tBody"></tbody></table>
     </div>
-    <button class="btn btn-primary" onclick="newQuestion()">🔀 新題目</button>
-    <button class="btn btn-gold" onclick="revealAll()">👁 Ans All</button>
-    <button class="btn btn-muted" onclick="resetAll()">↺ 全部重填</button>
+  </div>
+  <div style="text-align:center;margin-top:8px">
+    <button class="btn btn-submit" onclick="submitTest()">📤 交卷</button>
   </div>
 </div>
 
-<!-- Algorithm hint (toggle) -->
-<div class="card" id="hintCard">
-  <div class="algo-hint" id="algoHint">
-    載入中…
+<!-- ── Phase 3: Done ── -->
+<div id="phaseDone" style="display:none">
+  <h1>📝 插入排序法測驗 — 結果</h1>
+  <div class="card">
+    <div class="student-bar">
+      <div class="student-info-chips">
+        <div class="chip"><span>班級</span><span id="doneClass">—</span></div>
+        <div class="chip"><span>座號</span><span id="doneSeat">—</span></div>
+        <div class="chip"><span>姓名</span><span id="doneName">—</span></div>
+      </div>
+    </div>
   </div>
-</div>
-
-<!-- Score -->
-<div class="card">
-  <div class="score-bar">
-    <div class="score-item"><div class="val val-ok" id="scoreOk">0</div><div class="lbl">✓ 答對輪數</div></div>
-    <div class="score-item"><div class="val val-total" id="scoreTotal">0</div><div class="lbl">📋 總輪數</div></div>
-    <div class="score-item"><div class="val val-pct" id="scorePct">—</div><div class="lbl">🎯 正確率</div></div>
+  <div class="card">
+    <div class="score-big">
+      <div class="score-num" id="scoreNum">—</div>
+      <div class="score-sub">答對輪數 / 總輪數</div>
+      <div class="score-pct" id="scorePct">—</div>
+    </div>
+    <div class="submit-status" id="submitStatus"></div>
   </div>
-  <div class="result-msg" id="resultMsg"></div>
-</div>
-
-<!-- Practice table -->
-<div class="card">
-  <div class="table-wrap">
-    <table class="sort-table" id="sortTable">
-      <thead id="tableHead"></thead>
-      <tbody id="tableBody"></tbody>
-    </table>
+  <div class="card">
+    <div style="font-size:.8rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px">✅ 正確答案對照</div>
+    <div class="table-wrap">
+      <table class="sort-table"><thead id="dHead"></thead><tbody id="dBody"></tbody></table>
+    </div>
+  </div>
+  <div style="text-align:center;margin-top:8px">
+    <button class="btn btn-retry" onclick="location.reload()">↺ 重新測驗</button>
   </div>
 </div>
 
 <script>
-let originalArr = [];
-let steps = []; // steps[i] = { arr, key } for round i+1
-let n = 5;
-let rowRevealed = []; // bool per round
+// ====== 老師：請將 Google Apps Script 部署 URL 貼在這裡 ======
+const SHEET_URL = '';
+// ===========================================================
 
-// ── Insertion Sort ───────────────────────────────
-function insertionSortSteps(arr) {
-  const a = [...arr];
-  const result = [];
+const SUBJECT = '插入排序法';
+const COLORS = ['#f43f5e','#f97316','#eab308','#22c55e','#06b6d4','#6366f1','#a855f7','#ec4899'];
+
+let student = {}, originalArr = [], steps = [], n = 5;
+let timerSec = 0, timerInterval = null;
+
+// ── Algorithm ────────────────────────────────
+function sortSteps(arr) {
+  const a = [...arr], result = [];
   for (let i = 1; i < a.length; i++) {
-    const key = a[i];
-    let j = i - 1;
+    const key = a[i]; let j = i - 1;
     while (j >= 0 && a[j] > key) { a[j+1] = a[j]; j--; }
     a[j+1] = key;
-    result.push({ arr: [...a], key, insertIdx: i });
+    result.push({ arr: [...a], hint: `插入 ${key}` });
   }
   return result;
 }
 
-// ── Generate ─────────────────────────────────────
-function shuffle(a) {
-  for (let i = a.length-1; i > 0; i--) {
-    const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];
-  }
-  return a;
+function roundLabel(ri) { return `第 ${ri+1} 輪`; }
+
+// ── Helpers ──────────────────────────────────
+function shuffle(a) { for (let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a; }
+function isSorted(a) { for(let i=0;i<a.length-1;i++) if(a[i]>a[i+1]) return false; return true; }
+
+// ── Phase 1: Info ────────────────────────────
+function startTest() {
+  const c = document.getElementById('inputClass').value.trim();
+  const s = document.getElementById('inputSeat').value.trim();
+  const nm = document.getElementById('inputName').value.trim();
+  if (!c || !s || !nm) { document.getElementById('infoWarn').style.display='block'; return; }
+  student = { class: c, seat: s, name: nm };
+  ['showClass','showSeat','showName'].forEach((id,i)=>document.getElementById(id).textContent=[c,s,nm][i]);
+  document.getElementById('phaseInfo').style.display = 'none';
+  document.getElementById('phaseTest').style.display = 'block';
+  newQuestion();
+  startTimer();
 }
+
+// ── Timer ────────────────────────────────────
+function startTimer() {
+  timerSec = 0;
+  timerInterval = setInterval(() => {
+    timerSec++;
+    const m = String(Math.floor(timerSec/60)).padStart(2,'0');
+    const s = String(timerSec%60).padStart(2,'0');
+    document.getElementById('timerDisplay').textContent = m+':'+s;
+  }, 1000);
+}
+function stopTimer() { clearInterval(timerInterval); timerInterval = null; }
+function fmtTime(sec) { return String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0'); }
+
+// ── Phase 2: Question ────────────────────────
 function newQuestion() {
   n = parseInt(document.getElementById('numCount').value);
-  const range = parseInt(document.getElementById('numRange').value);
-  // Generate n unique numbers
-  const pool = Array.from({length: range}, (_,i) => i+1);
-  shuffle(pool);
+  const pool = Array.from({length:99},(_,i)=>i+1); shuffle(pool);
   originalArr = pool.slice(0, n);
-  steps = insertionSortSteps([...originalArr]);
-  rowRevealed = Array(steps.length).fill(false);
+  while (isSorted(originalArr)) shuffle(originalArr);
+  steps = sortSteps([...originalArr]);
   renderTable();
-  updateScore();
-  document.getElementById('resultMsg').textContent = '';
-  updateHint();
-}
-
-// ── Hint ─────────────────────────────────────────
-function updateHint() {
-  const n = originalArr.length;
-  document.getElementById('algoHint').innerHTML =
-    `<b>插入排序法原理：</b>從第 2 個數開始，每一輪取出一個數（稱為「鍵值 key」），
-往左比較，遇到比它大的就右移，直到找到正確位置插入。<br>
-共需 <b>${steps.length} 輪</b>，第 <b>k</b> 輪結束後，前 <b>k+1</b> 個數已排序完成。`;
-}
-
-// ── Render Table ──────────────────────────────────
-const COLORS = ['#f43f5e','#f97316','#eab308','#22c55e','#06b6d4','#6366f1','#a855f7','#ec4899'];
-function cellColor(val) {
-  // deterministic color based on value (normalized to COLORS array)
-  const idx = (val - 1) % COLORS.length;
-  return COLORS[idx];
 }
 
 function renderTable() {
   // Header
-  const thead = document.getElementById('tableHead');
-  let headerHtml = '<tr><th style="text-align:left">輪次</th>';
-  for (let i = 1; i <= n; i++) headerHtml += `<th>位置 ${i}</th>`;
-  headerHtml += '<th>鍵值</th><th>操作</th></tr>';
-  thead.innerHTML = headerHtml;
-
-  // Body
-  const tbody = document.getElementById('tableBody');
-  let html = '';
+  let h = '<tr><th style="text-align:left">輪次</th>';
+  for (let i=1;i<=n;i++) h += `<th>位置 ${i}</th>`;
+  h += '<th>提示</th></tr>';
+  document.getElementById('tHead').innerHTML = h;
 
   // Original row
-  html += '<tr>';
-  html += '<td class="row-label original">原始資料</td>';
-  for (let i = 0; i < n; i++) {
-    const val = originalArr[i];
-    const isKey1 = (i === 1); // first key to be inserted
-    html += `<td><div class="data-cell${isKey1 ? ' key-cell' : ''}" style="background:${cellColor(val)}">${val}</div></td>`;
-  }
-  html += `<td class="key-hint" style="color:var(--gold)">—</td>`;
-  html += '<td class="actions"></td>';
-  html += '</tr>';
+  let b = '<tr><td class="row-label lbl-orig">原始資料</td>';
+  originalArr.forEach((v,i) => {
+    b += `<td><div class="data-cell" style="background:${COLORS[(v-1)%COLORS.length]}">${v}</div></td>`;
+  });
+  b += '<td></td></tr>';
 
   // Round rows
   steps.forEach((step, ri) => {
-    html += `<tr id="row-${ri}">`;
-    html += `<td class="row-label round">第 ${ri+1} 輪</td>`;
-    for (let ci = 0; ci < n; ci++) {
-      html += `<td><input type="number" class="sort-input" id="cell-${ri}-${ci}"
-        placeholder="?" min="1" max="999"
-        onkeydown="handleKey(event,${ri},${ci})"
-        oninput="onCellInput(${ri},${ci})"></td>`;
+    b += `<tr id="row${ri}"><td class="row-label lbl-round">${roundLabel(ri)}</td>`;
+    for (let ci=0; ci<n; ci++) {
+      b += `<td><input type="number" class="sort-input" id="c${ri}_${ci}" min="1" max="999"
+        onkeydown="handleKey(event,${ri},${ci})" placeholder="?"></td>`;
     }
-    html += `<td class="key-hint"><span style="color:var(--gold);font-weight:800">← ${step.key}</span></td>`;
-    html += `<td class="actions" style="display:flex;gap:6px;align-items:center">
-      <span class="row-status" id="status-${ri}"></span>
-      <button class="btn btn-success btn-sm" onclick="checkRow(${ri})">✓ 確認</button>
-      <button class="btn btn-muted btn-sm" onclick="revealRow(${ri})">Ans</button>
-    </td>`;
-    html += '</tr>';
+    b += `<td class="hint-cell">← ${step.hint}</td></tr>`;
   });
 
-  tbody.innerHTML = html;
+  document.getElementById('tBody').innerHTML = b;
+  document.getElementById('c0_0')?.focus();
 }
 
-// ── Key navigation ────────────────────────────────
 function handleKey(e, ri, ci) {
-  if (e.key === 'Enter' || e.key === 'Tab') {
+  if (e.key==='Enter'||e.key==='Tab') {
     e.preventDefault();
-    // Move to next cell (right, then next row start)
-    const nextCi = ci + 1;
-    if (nextCi < n) {
-      document.getElementById(`cell-${ri}-${nextCi}`)?.focus();
-    } else {
-      const nextRi = ri + 1;
-      if (nextRi < steps.length) {
-        document.getElementById(`cell-${nextRi}-0`)?.focus();
-      } else {
-        // Last cell: trigger check for this row
-        checkRow(ri);
-      }
-    }
+    const next = ci+1 < n ? document.getElementById(`c${ri}_${ci+1}`)
+                           : document.getElementById(`c${ri+1}_0`);
+    next?.focus();
   }
 }
 
-function onCellInput(ri, ci) {
-  // Clear correctness styling when user edits
-  const el = document.getElementById(`cell-${ri}-${ci}`);
-  el.classList.remove('correct','incorrect','revealed');
-  document.getElementById(`status-${ri}`).textContent = '';
-  document.getElementById(`status-${ri}`).className = 'row-status';
-}
+// ── Phase 3: Submit ──────────────────────────
+function submitTest() {
+  if (!confirm('確定要交卷嗎？交卷後無法修改。')) return;
+  stopTimer();
 
-// ── Check ─────────────────────────────────────────
-function checkRow(ri) {
-  if (rowRevealed[ri]) return;
-  const correct = steps[ri].arr;
-  let allCorrect = true, anyFilled = false;
-  for (let ci = 0; ci < n; ci++) {
-    const el = document.getElementById(`cell-${ri}-${ci}`);
-    const val = parseInt(el.value);
-    if (el.value.trim() === '' || isNaN(val)) {
-      el.classList.remove('correct','incorrect');
-      allCorrect = false;
-      continue;
-    }
-    anyFilled = true;
-    if (val === correct[ci]) {
-      el.classList.add('correct'); el.classList.remove('incorrect');
-    } else {
-      el.classList.add('incorrect'); el.classList.remove('correct');
-      allCorrect = false;
-    }
-  }
-  const statusEl = document.getElementById(`status-${ri}`);
-  if (allCorrect && anyFilled) {
-    statusEl.textContent = '✓'; statusEl.className = 'row-status ok';
-  } else if (anyFilled) {
-    statusEl.textContent = '✗'; statusEl.className = 'row-status wrong';
-  }
-  updateScore();
-}
-
-// ── Reveal ────────────────────────────────────────
-function revealRow(ri) {
-  rowRevealed[ri] = true;
-  const correct = steps[ri].arr;
-  for (let ci = 0; ci < n; ci++) {
-    const el = document.getElementById(`cell-${ri}-${ci}`);
-    el.value = correct[ci];
-    el.classList.remove('correct','incorrect');
-    el.classList.add('revealed');
-    el.disabled = true;
-  }
-  const statusEl = document.getElementById(`status-${ri}`);
-  statusEl.textContent = '👁'; statusEl.className = 'row-status revealed';
-  updateScore();
-}
-
-function revealAll() {
-  steps.forEach((_, ri) => revealRow(ri));
-}
-
-// ── Reset ─────────────────────────────────────────
-function resetAll() {
-  rowRevealed = Array(steps.length).fill(false);
-  steps.forEach((_, ri) => {
-    for (let ci = 0; ci < n; ci++) {
-      const el = document.getElementById(`cell-${ri}-${ci}`);
-      el.value = '';
-      el.classList.remove('correct','incorrect','revealed');
-      el.disabled = false;
-    }
-    const statusEl = document.getElementById(`status-${ri}`);
-    statusEl.textContent = ''; statusEl.className = 'row-status';
-  });
-  updateScore();
-  document.getElementById('resultMsg').textContent = '';
-}
-
-// ── Score ─────────────────────────────────────────
-function updateScore() {
   let ok = 0;
   const total = steps.length;
-  steps.forEach((step, ri) => {
-    let allCorrect = true, anyFilled = false;
-    for (let ci = 0; ci < n; ci++) {
-      const el = document.getElementById(`cell-${ri}-${ci}`);
-      if (!el) return;
-      const val = parseInt(el.value);
-      if (el.value.trim() === '' || isNaN(val)) { allCorrect = false; continue; }
-      anyFilled = true;
-      if (val !== step.arr[ci]) allCorrect = false;
-    }
-    if (allCorrect && anyFilled) ok++;
+  const userAnswers = steps.map((step, ri) => {
+    return Array.from({length:n}, (_,ci) => parseInt(document.getElementById(`c${ri}_${ci}`)?.value)||0);
   });
-  document.getElementById('scoreOk').textContent = ok;
-  document.getElementById('scoreTotal').textContent = total;
-  document.getElementById('scorePct').textContent = total > 0 ? Math.round(ok/total*100) + '%' : '—';
-  const msgEl = document.getElementById('resultMsg');
-  if (ok === total && total > 0) {
-    msgEl.textContent = '🎉 全部正確！排序演算法掌握得很好！';
-    msgEl.className = 'result-msg win';
-  } else if (ok > 0) {
-    msgEl.textContent = `✓ 已有 ${ok} 輪正確`;
-    msgEl.className = 'result-msg partial';
-  } else {
-    msgEl.textContent = '';
-  }
+
+  steps.forEach((step, ri) => {
+    const correct = step.arr;
+    const isRowOk = userAnswers[ri].every((v,ci) => v === correct[ci]);
+    if (isRowOk) ok++;
+  });
+
+  const pct = total > 0 ? Math.round(ok/total*100) : 0;
+  const elapsed = fmtTime(timerSec);
+
+  // Show result phase
+  document.getElementById('phaseTest').style.display = 'none';
+  document.getElementById('phaseDone').style.display = 'block';
+  ['doneClass','doneSeat','doneName'].forEach((id,i)=>document.getElementById(id).textContent=[student.class,student.seat,student.name][i]);
+  document.getElementById('scoreNum').textContent = `${ok} / ${total}`;
+  document.getElementById('scorePct').textContent = `${pct}%`;
+
+  // Build result table
+  let h = '<tr><th style="text-align:left">輪次</th>';
+  for (let i=1;i<=n;i++) h += `<th>位置 ${i}</th>`;
+  h += '<th></th></tr>';
+  document.getElementById('dHead').innerHTML = h;
+
+  let b = '<tr><td class="row-label lbl-orig">原始資料</td>';
+  originalArr.forEach(v => { b += `<td><div class="data-cell" style="background:${COLORS[(v-1)%COLORS.length]}">${v}</div></td>`; });
+  b += '<td></td></tr>';
+
+  steps.forEach((step, ri) => {
+    const correct = step.arr;
+    b += `<tr><td class="row-label lbl-round">${roundLabel(ri)}</td>`;
+    correct.forEach((cv, ci) => {
+      const uv = userAnswers[ri][ci];
+      const cls = uv === cv ? 'correct' : 'incorrect';
+      b += `<td><input class="sort-input ${cls}" value="${uv||''}" disabled>
+            <div style="font-size:.65rem;text-align:center;color:${cls==='correct'?'var(--green)':'var(--red)'};margin-top:2px">${cls==='correct'?'✓':cv}</div></td>`;
+    });
+    b += `<td class="hint-cell">← ${step.hint}</td></tr>`;
+  });
+  document.getElementById('dBody').innerHTML = b;
+
+  // Submit to Sheets
+  submitToSheets({ subject: SUBJECT, class: student.class, seat: student.seat, name: student.name,
+    score: ok, total, pct, elapsed, original: originalArr.join(',') });
 }
 
-// ── Boot ─────────────────────────────────────────
-newQuestion();
+function submitToSheets(data) {
+  const statusEl = document.getElementById('submitStatus');
+  if (!SHEET_URL) { statusEl.textContent = '（未設定 Google Sheets，成績僅顯示於此頁）'; statusEl.className='submit-status'; return; }
+  statusEl.textContent = '📡 傳送成績中…'; statusEl.className = 'submit-status pending';
+  fetch(SHEET_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain'}, body: JSON.stringify(data) })
+    .then(() => { statusEl.textContent = '✅ 成績已儲存至試算表'; statusEl.className='submit-status ok'; })
+    .catch(() => { statusEl.textContent = '❌ 傳送失敗，請告知老師'; statusEl.className='submit-status err'; });
+}
+
+// Enter to submit info form
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('phaseInfo').style.display !== 'none') startTest();
+});
 </script>
 </body>
 </html>

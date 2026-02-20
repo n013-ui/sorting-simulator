@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>氣泡排序法 — 課堂測驗</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0f172a;--card:#1e293b;--card2:#273449;--accent:#38bdf8;--accent2:#f472b6;--gold:#fbbf24;--green:#4ade80;--red:#f87171;--text:#e2e8f0;--muted:#94a3b8;--border:#334155;--purple:#818cf8;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:16px;}
+h1{text-align:center;font-size:1.9rem;font-weight:900;background:linear-gradient(135deg,#06b6d4,#4ade80);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px;}
+.subtitle{text-align:center;color:var(--muted);font-size:.88rem;margin-bottom:20px;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:16px;}
+.info-card{max-width:420px;margin:40px auto;}
+.info-card h2{font-size:1.3rem;font-weight:800;margin-bottom:6px;color:#06b6d4;}
+.info-card p{font-size:.85rem;color:var(--muted);margin-bottom:20px;}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:.82rem;font-weight:700;color:var(--muted);margin-bottom:5px;}
+.field input{width:100%;background:var(--card2);border:2px solid var(--border);color:var(--text);border-radius:10px;padding:10px 14px;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:700;outline:none;}
+.field input:focus{border-color:#06b6d4;}
+.btn{padding:10px 22px;border-radius:10px;border:none;font-family:'Nunito',sans-serif;font-weight:800;font-size:.95rem;cursor:pointer;transition:all .15s;}
+.btn:hover{transform:translateY(-2px);filter:brightness(1.15);}
+.btn:active{transform:translateY(0);}
+.btn-start{background:#06b6d4;color:#0f172a;width:100%;font-size:1.05rem;padding:12px;}
+.btn-submit{background:var(--green);color:#0f172a;font-size:1rem;padding:11px 28px;}
+.btn-retry{background:#06b6d4;color:#0f172a;}
+.btn-sm{padding:5px 12px;font-size:.78rem;border-radius:8px;}
+.student-bar{display:flex;gap:16px;flex-wrap:wrap;align-items:center;justify-content:space-between;}
+.student-info-chips{display:flex;gap:8px;flex-wrap:wrap;}
+.chip{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:4px 12px;font-size:.82rem;font-weight:700;}
+.chip span{color:var(--muted);font-weight:400;margin-right:4px;}
+.timer-box{font-size:1.1rem;font-weight:900;color:var(--gold);}
+.controls-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+select{background:var(--card2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:6px 10px;font-family:'Nunito',sans-serif;font-size:.88rem;cursor:pointer;}
+.table-wrap{overflow-x:auto;}
+table.sort-table{width:100%;border-collapse:separate;border-spacing:0 7px;}
+.sort-table th{font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700;padding:3px 6px;text-align:center;}
+.sort-table td{padding:0 4px;vertical-align:middle;}
+.row-label{font-size:.85rem;font-weight:800;white-space:nowrap;padding-right:10px!important;}
+.lbl-orig{color:var(--accent);}
+.lbl-round{color:var(--text);}
+.hint-cell{font-size:.75rem;color:var(--gold);padding-left:8px!important;white-space:nowrap;}
+.data-cell{width:50px;height:50px;border-radius:11px;display:inline-flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:900;color:#fff;background:var(--card2);border:2px solid var(--border);}
+.sort-input{width:50px;height:50px;border-radius:11px;background:var(--card2);border:2px solid var(--border);color:var(--text);font-family:'Nunito',sans-serif;font-size:1.1rem;font-weight:900;text-align:center;outline:none;-moz-appearance:textfield;}
+.sort-input::-webkit-outer-spin-button,.sort-input::-webkit-inner-spin-button{-webkit-appearance:none;}
+.sort-input:focus{border-color:#06b6d4;background:rgba(6,182,212,.1);}
+.sort-input.correct{background:rgba(74,222,128,.15);border-color:var(--green);color:var(--green);}
+.sort-input.incorrect{background:rgba(248,113,113,.15);border-color:var(--red);color:var(--red);}
+.sort-input:disabled{cursor:default;opacity:1;}
+.score-big{text-align:center;padding:10px 0;}
+.score-num{font-size:3rem;font-weight:900;color:var(--green);line-height:1;}
+.score-sub{font-size:.95rem;color:var(--muted);margin-top:4px;}
+.score-pct{font-size:1.5rem;font-weight:900;color:var(--gold);}
+.submit-status{text-align:center;font-size:.9rem;font-weight:700;padding:8px;min-height:32px;}
+.submit-status.ok{color:var(--green);}
+.submit-status.err{color:var(--red);}
+.submit-status.pending{color:var(--gold);}
+.warn-box{background:rgba(248,113,113,.1);border:1px solid var(--red);border-radius:10px;padding:10px 14px;font-size:.85rem;color:var(--red);margin-bottom:12px;display:none;}
+@media(max-width:500px){.data-cell,.sort-input{width:40px;height:40px;font-size:.95rem;}h1{font-size:1.4rem;}}
+</style>
+</head>
+<body>
+
+<!-- Phase 1 -->
+<div id="phaseInfo">
+  <h1>🫧 氣泡排序法測驗</h1>
+  <p class="subtitle">請先輸入您的資料，再開始作答</p>
+  <div class="card info-card">
+    <h2>學生資料</h2>
+    <p>請確認資料正確，開始後無法修改</p>
+    <div class="field"><label>班級</label><input type="text" id="inputClass" placeholder="例如：303" maxlength="20" autocomplete="off"></div>
+    <div class="field"><label>座號</label><input type="text" id="inputSeat" placeholder="例如：12" maxlength="5" autocomplete="off"></div>
+    <div class="field"><label>姓名</label><input type="text" id="inputName" placeholder="請輸入真實姓名" maxlength="20" autocomplete="off"></div>
+    <div class="warn-box" id="infoWarn">請填寫所有欄位</div>
+    <button class="btn btn-start" onclick="startTest()">開始測驗 →</button>
+  </div>
+</div>
+
+<!-- Phase 2 -->
+<div id="phaseTest" style="display:none">
+  <h1>🫧 氣泡排序法測驗</h1>
+  <div class="card">
+    <div class="student-bar">
+      <div class="student-info-chips">
+        <div class="chip"><span>班級</span><span id="showClass">—</span></div>
+        <div class="chip"><span>座號</span><span id="showSeat">—</span></div>
+        <div class="chip"><span>姓名</span><span id="showName">—</span></div>
+      </div>
+      <div class="timer-box">⏱️ <span id="timerDisplay">00:00</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="controls-row" style="margin-bottom:14px">
+      <label style="font-size:.82rem;color:var(--muted);font-weight:700">數字個數：</label>
+      <select id="numCount" onchange="newQuestion()">
+        <option value="4">4 個</option><option value="5" selected>5 個</option>
+        <option value="6">6 個</option><option value="7">7 個</option>
+      </select>
+      <button class="btn btn-sm" style="background:var(--card2);color:var(--muted);border:1px solid var(--border)" onclick="newQuestion()">🔀 換題</button>
+    </div>
+    <div class="table-wrap">
+      <table class="sort-table"><thead id="tHead"></thead><tbody id="tBody"></tbody></table>
+    </div>
+  </div>
+  <div style="text-align:center;margin-top:8px">
+    <button class="btn btn-submit" onclick="submitTest()">📤 交卷</button>
+  </div>
+</div>
+
+<!-- Phase 3 -->
+<div id="phaseDone" style="display:none">
+  <h1>🫧 氣泡排序法測驗 — 結果</h1>
+  <div class="card">
+    <div class="student-bar">
+      <div class="student-info-chips">
+        <div class="chip"><span>班級</span><span id="doneClass">—</span></div>
+        <div class="chip"><span>座號</span><span id="doneSeat">—</span></div>
+        <div class="chip"><span>姓名</span><span id="doneName">—</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="score-big">
+      <div class="score-num" id="scoreNum">—</div>
+      <div class="score-sub">答對回合數 / 總回合數</div>
+      <div class="score-pct" id="scorePct">—</div>
+    </div>
+    <div class="submit-status" id="submitStatus"></div>
+  </div>
+  <div class="card">
+    <div style="font-size:.8rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px">✅ 正確答案對照</div>
+    <div class="table-wrap">
+      <table class="sort-table"><thead id="dHead"></thead><tbody id="dBody"></tbody></table>
+    </div>
+  </div>
+  <div style="text-align:center;margin-top:8px">
+    <button class="btn btn-retry" onclick="location.reload()">↺ 重新測驗</button>
+  </div>
+</div>
+
+<script>
+// ====== 老師：請將 Google Apps Script 部署 URL 貼在這裡 ======
+const SHEET_URL = '';
+// ===========================================================
+
+const SUBJECT = '氣泡排序法';
+const COLORS = ['#f43f5e','#f97316','#eab308','#22c55e','#06b6d4','#6366f1','#a855f7','#ec4899'];
+
+let student = {}, originalArr = [], steps = [], n = 5;
+let timerSec = 0, timerInterval = null;
+
+// ── Algorithm: Bubble Sort ───────────────────
+// Each step = state after one complete pass
+function sortSteps(arr) {
+  const a = [...arr], result = [];
+  for (let pass = 0; pass < a.length - 1; pass++) {
+    let swapped = false;
+    for (let j = 0; j < a.length - 1 - pass; j++) {
+      if (a[j] > a[j+1]) { [a[j], a[j+1]] = [a[j+1], a[j]]; swapped = true; }
+    }
+    result.push({ arr: [...a], hint: `最大值冒泡至位置${a.length - pass}` });
+    if (!swapped) break; // early termination
+  }
+  return result;
+}
+
+function roundLabel(ri) { return `第 ${ri+1} 回合`; }
+
+function shuffle(a) { for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a; }
+function isSorted(a) { for(let i=0;i<a.length-1;i++) if(a[i]>a[i+1]) return false; return true; }
+
+function startTest() {
+  const c=document.getElementById('inputClass').value.trim();
+  const s=document.getElementById('inputSeat').value.trim();
+  const nm=document.getElementById('inputName').value.trim();
+  if(!c||!s||!nm){document.getElementById('infoWarn').style.display='block';return;}
+  student={class:c,seat:s,name:nm};
+  ['showClass','showSeat','showName'].forEach((id,i)=>document.getElementById(id).textContent=[c,s,nm][i]);
+  document.getElementById('phaseInfo').style.display='none';
+  document.getElementById('phaseTest').style.display='block';
+  newQuestion(); startTimer();
+}
+
+function startTimer() {
+  timerSec=0;
+  timerInterval=setInterval(()=>{
+    timerSec++;
+    document.getElementById('timerDisplay').textContent=
+      String(Math.floor(timerSec/60)).padStart(2,'0')+':'+String(timerSec%60).padStart(2,'0');
+  },1000);
+}
+function stopTimer(){clearInterval(timerInterval);timerInterval=null;}
+function fmtTime(sec){return String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0');}
+
+function newQuestion() {
+  n=parseInt(document.getElementById('numCount').value);
+  const pool=Array.from({length:99},(_,i)=>i+1);shuffle(pool);
+  originalArr=pool.slice(0,n);
+  while(isSorted(originalArr))shuffle(originalArr);
+  steps=sortSteps([...originalArr]);
+  renderTable();
+}
+
+function renderTable() {
+  let h='<tr><th style="text-align:left">回合</th>';
+  for(let i=1;i<=n;i++) h+=`<th>位置 ${i}</th>`;
+  h+='<th>提示</th></tr>';
+  document.getElementById('tHead').innerHTML=h;
+
+  let b='<tr><td class="row-label lbl-orig">原始資料</td>';
+  originalArr.forEach(v=>{b+=`<td><div class="data-cell" style="background:${COLORS[(v-1)%COLORS.length]}">${v}</div></td>`;});
+  b+='<td></td></tr>';
+
+  steps.forEach((step,ri)=>{
+    b+=`<tr><td class="row-label lbl-round">${roundLabel(ri)}</td>`;
+    for(let ci=0;ci<n;ci++){
+      b+=`<td><input type="number" class="sort-input" id="c${ri}_${ci}" min="1" max="999"
+        onkeydown="handleKey(event,${ri},${ci})" placeholder="?"></td>`;
+    }
+    b+=`<td class="hint-cell">← ${step.hint}</td></tr>`;
+  });
+  document.getElementById('tBody').innerHTML=b;
+  document.getElementById('c0_0')?.focus();
+}
+
+function handleKey(e,ri,ci){
+  if(e.key==='Enter'||e.key==='Tab'){
+    e.preventDefault();
+    const next=ci+1<n?document.getElementById(`c${ri}_${ci+1}`):document.getElementById(`c${ri+1}_0`);
+    next?.focus();
+  }
+}
+
+function submitTest(){
+  if(!confirm('確定要交卷嗎？交卷後無法修改。'))return;
+  stopTimer();
+  let ok=0;
+  const total=steps.length;
+  const userAnswers=steps.map((step,ri)=>Array.from({length:n},(_,ci)=>parseInt(document.getElementById(`c${ri}_${ci}`)?.value)||0));
+  steps.forEach((step,ri)=>{if(userAnswers[ri].every((v,ci)=>v===step.arr[ci]))ok++;});
+  const pct=total>0?Math.round(ok/total*100):0;
+
+  document.getElementById('phaseTest').style.display='none';
+  document.getElementById('phaseDone').style.display='block';
+  ['doneClass','doneSeat','doneName'].forEach((id,i)=>document.getElementById(id).textContent=[student.class,student.seat,student.name][i]);
+  document.getElementById('scoreNum').textContent=`${ok} / ${total}`;
+  document.getElementById('scorePct').textContent=`${pct}%`;
+
+  let h='<tr><th style="text-align:left">回合</th>';
+  for(let i=1;i<=n;i++) h+=`<th>位置 ${i}</th>`;
+  h+='<th></th></tr>';
+  document.getElementById('dHead').innerHTML=h;
+
+  let b='<tr><td class="row-label lbl-orig">原始資料</td>';
+  originalArr.forEach(v=>{b+=`<td><div class="data-cell" style="background:${COLORS[(v-1)%COLORS.length]}">${v}</div></td>`;});
+  b+='<td></td></tr>';
+
+  steps.forEach((step,ri)=>{
+    b+=`<tr><td class="row-label lbl-round">${roundLabel(ri)}</td>`;
+    step.arr.forEach((cv,ci)=>{
+      const uv=userAnswers[ri][ci];
+      const cls=uv===cv?'correct':'incorrect';
+      b+=`<td><input class="sort-input ${cls}" value="${uv||''}" disabled>
+          <div style="font-size:.65rem;text-align:center;color:${cls==='correct'?'var(--green)':'var(--red)'};margin-top:2px">${cls==='correct'?'✓':cv}</div></td>`;
+    });
+    b+=`<td class="hint-cell">← ${step.hint}</td></tr>`;
+  });
+  document.getElementById('dBody').innerHTML=b;
+
+  submitToSheets({subject:SUBJECT,class:student.class,seat:student.seat,name:student.name,
+    score:ok,total,pct,elapsed:fmtTime(timerSec),original:originalArr.join(',')});
+}
+
+function submitToSheets(data){
+  const el=document.getElementById('submitStatus');
+  if(!SHEET_URL){el.textContent='（未設定 Google Sheets，成績僅顯示於此頁）';el.className='submit-status';return;}
+  el.textContent='📡 傳送成績中…';el.className='submit-status pending';
+  fetch(SHEET_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(data)})
+    .then(()=>{el.textContent='✅ 成績已儲存至試算表';el.className='submit-status ok';})
+    .catch(()=>{el.textContent='❌ 傳送失敗，請告知老師';el.className='submit-status err';});
+}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&document.getElementById('phaseInfo').style.display!=='none')startTest();
+});
+</script>
+</body>
+</html>
