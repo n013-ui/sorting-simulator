@@ -116,11 +116,20 @@ select { background: var(--card2); border: 1px solid var(--border); color: var(-
 .tag-swap { background: var(--accent2); color: #0f172a; }
 .tag-done { background: var(--green); color: #0f172a; }
 
-.history-section { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; }
-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
-th { text-align: left; padding: 6px 10px; color: var(--muted); font-weight: 700; border-bottom: 1px solid var(--border); font-size: 0.75rem; text-transform: uppercase; }
-td { padding: 6px 10px; border-bottom: 1px solid var(--border); }
-tr:last-child td { border-bottom: none; }
+.leaderboard-section { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-top: 16px; }
+.lb-tabs { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+.lb-tab { padding: 5px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--card2); color: var(--muted); font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.85rem; cursor: pointer; transition: all 0.15s; }
+.lb-tab:hover { border-color: var(--accent); color: var(--accent); }
+.lb-tab.active { background: var(--accent); color: #0f172a; border-color: var(--accent); }
+.lb-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+.lb-table th { text-align: left; padding: 6px 10px; color: var(--muted); font-weight: 700; border-bottom: 1px solid var(--border); font-size: 0.75rem; text-transform: uppercase; }
+.lb-table td { padding: 6px 10px; border-bottom: 1px solid var(--border); }
+.lb-table tr:last-child td { border-bottom: none; }
+.lb-rank-1 { color: var(--gold); font-weight: 900; }
+.lb-rank-2 { color: #94a3b8; font-weight: 900; }
+.lb-rank-3 { color: #b45309; font-weight: 900; }
+.lb-me { background: rgba(56,189,248,0.08); }
+.lb-empty { text-align: center; padding: 20px; color: var(--muted); font-size: 0.88rem; }
 
 .win-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 99; }
 .win-banner { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); background: var(--card); border: 2px solid var(--green); border-radius: 20px; padding: 32px 36px; text-align: center; z-index: 100; box-shadow: 0 20px 60px rgba(0,0,0,0.8); min-width: 280px; max-width: 380px; width: 92%; }
@@ -283,17 +292,19 @@ tr:last-child td { border-bottom: none; }
   <div class="log-list" id="logList"></div>
 </div>
 
-<div class="history-section">
-  <div class="log-title">
-    <span>🏆 本機歷史紀錄</span>
-    <button class="btn btn-danger" style="padding:4px 10px;font-size:0.75rem" onclick="clearHistory()">清除</button>
+<div class="leaderboard-section">
+  <div class="log-title" style="margin-bottom:10px">
+    <span>🏆 各球數前十名排行榜</span>
+    <button class="btn btn-muted btn-sm" onclick="fetchLeaderboard()">🔄 更新</button>
   </div>
-  <table>
-    <thead>
-      <tr><th>#</th><th>姓名</th><th>球數</th><th>比較次數</th><th>交換次數</th><th>用時</th><th>時間</th></tr>
-    </thead>
-    <tbody id="historyBody"></tbody>
-  </table>
+  <div class="lb-tabs" id="lbTabs">
+    <button class="lb-tab" onclick="switchLbTab(4)">4 顆</button>
+    <button class="lb-tab active" onclick="switchLbTab(5)">5 顆</button>
+    <button class="lb-tab" onclick="switchLbTab(6)">6 顆</button>
+    <button class="lb-tab" onclick="switchLbTab(7)">7 顆</button>
+    <button class="lb-tab" onclick="switchLbTab(8)">8 顆</button>
+  </div>
+  <div id="lbContent"><div class="lb-empty">載入中…</div></div>
 </div>
 
 <div class="win-overlay" id="winOverlay" onclick="closeWin()"></div>
@@ -302,7 +313,8 @@ tr:last-child td { border-bottom: none; }
   <div class="win-stats" id="winStats"></div>
   <div class="submit-status" id="submitStatus"></div>
   <div class="win-actions">
-    <button class="btn btn-primary" onclick="closeWin(); startNewGame()">🔀 再練一次</button>
+    <button class="btn btn-success" onclick="replaySameBalls()">🔁 同球數再練</button>
+    <button class="btn btn-primary" onclick="closeWin(); startNewGame()">🔀 換球數練習</button>
     <button class="btn btn-muted" onclick="closeWin(); changeStudent()">換人</button>
   </div>
 </div>
@@ -320,10 +332,14 @@ let arr = [], panL = null, panR = null;
 let labelOf = {};
 let compareCount = 0, swapCount = 0;
 let startTime = null, timerInterval = null, gameDone = false;
-let history = JSON.parse(localStorage.getItem('sortHistoryFree') || '[]');
 
 // ===== 學生狀態 =====
 let currentStudent = null; // { cls, seat, name }
+
+// ===== 排行榜狀態 =====
+var currentBallCount = 5;
+var lbData = [];
+var lbActiveBalls = 5;
 
 // ===== 個人紀錄（localStorage）=====
 function getRecordKey(s) {
@@ -442,6 +458,8 @@ function initGame() {
 function startNewGame() {
   stopTimer();
   var n = parseInt(document.getElementById('ballCount').value);
+  currentBallCount = n;
+  switchLbTab(n);
   arr = shuffle(Array.from({length:n},function(_,i){return i+1;}));
   while (isSorted()) arr = shuffle(arr.slice());
   var shuffledLabels = shuffle(BALL_LABELS.slice(0, n));
@@ -577,7 +595,7 @@ function checkWin() {
   var order = arr.map(function(w){ return '球'+labelOf[w]; }).join('＜');
   addLog('done','排序完成！'+order+'，比較 '+compareCount+' 次，交換 '+swapCount+' 次，用時 '+t);
   setMsg('🎉 排序完成！比較 '+compareCount+' 次，交換 '+swapCount+' 次，用時 '+t);
-  saveHistory(); renderBalls();
+  renderBalls();
 
   // 勝利 Banner
   var revealOrder = arr.map(function(w){ return '球'+labelOf[w]; }).join(' ＜ ');
@@ -595,6 +613,8 @@ function checkWin() {
   document.getElementById('winStats').innerHTML = html;
   document.getElementById('winBanner').style.display = 'block';
   document.getElementById('winOverlay').style.display = 'block';
+  // 成功後更新排行榜（稍作延遲等 Apps Script 處理完畢）
+  setTimeout(fetchLeaderboard, 2000);
 }
 
 function closeWin() {
@@ -649,32 +669,83 @@ function addLog(type, msg) {
 }
 function clearLog() { document.getElementById('logList').innerHTML=''; document.getElementById('logCount').textContent='0 筆'; }
 
-// ===== 本機歷史紀錄 =====
-function saveHistory() {
-  var n = parseInt(document.getElementById('ballCount').value);
-  var name = currentStudent ? currentStudent.name : '—';
-  history.unshift({
-    n: n, name: name,
-    compare: compareCount, swap: swapCount,
-    elapsed: elapsedStr(), time: new Date().toLocaleTimeString('zh-TW')
-  });
-  if (history.length > 20) history = history.slice(0, 20);
-  localStorage.setItem('sortHistoryFree', JSON.stringify(history));
-  renderHistory();
+// ===== 同球數再練 =====
+function replaySameBalls() {
+  document.getElementById('ballCount').value = String(currentBallCount);
+  closeWin();
+  startNewGame();
 }
-function renderHistory() {
-  var tbody = document.getElementById('historyBody'); tbody.innerHTML = '';
-  history.forEach(function(h, i) {
-    var tr = document.createElement('tr');
-    tr.innerHTML = '<td>'+(i+1)+'</td><td>'+(h.name||'—')+'</td><td>'+h.n+' 顆</td><td>'+h.compare+'</td><td>'+h.swap+'</td><td>'+(h.elapsed||'-')+'</td><td>'+h.time+'</td>';
-    tbody.appendChild(tr);
-  });
+
+// ===== 雲端排行榜 =====
+function fetchLeaderboard() {
+  if (!SHEET_URL) return;
+  var contentEl = document.getElementById('lbContent');
+  contentEl.innerHTML = '<div class="lb-empty">載入中…</div>';
+  fetch(SHEET_URL + '?action=leaderboard')
+    .then(function(res) { return res.json(); })
+    .then(function(json) {
+      if (json.ok) {
+        lbData = json.data;
+        renderLeaderboard(lbActiveBalls);
+      } else {
+        contentEl.innerHTML = '<div class="lb-empty">⚠️ 載入失敗</div>';
+      }
+    })
+    .catch(function() {
+      contentEl.innerHTML = '<div class="lb-empty">⚠️ 無法連線，請稍後再試</div>';
+    });
 }
-function clearHistory() { history=[]; localStorage.removeItem('sortHistoryFree'); renderHistory(); }
+
+function switchLbTab(balls) {
+  lbActiveBalls = balls;
+  var tabs = document.getElementById('lbTabs').querySelectorAll('.lb-tab');
+  var ballCounts = [4, 5, 6, 7, 8];
+  tabs.forEach(function(tab, i) {
+    if (ballCounts[i] === balls) tab.classList.add('active');
+    else tab.classList.remove('active');
+  });
+  renderLeaderboard(balls);
+}
+
+function renderLeaderboard(balls) {
+  var contentEl = document.getElementById('lbContent');
+  var rows = lbData.filter(function(r) { return Number(r.balls) === balls; });
+  if (rows.length === 0) {
+    contentEl.innerHTML = '<div class="lb-empty">目前還沒有 ' + balls + ' 顆球的紀錄 — 來爭第一名吧！</div>';
+    return;
+  }
+  var medals = ['🥇', '🥈', '🥉'];
+  var myName = currentStudent ? currentStudent.name : null;
+  var myCls  = currentStudent ? currentStudent.cls  : null;
+  var mySeat = currentStudent ? currentStudent.seat  : null;
+  var html = '<table class="lb-table"><thead><tr><th>排名</th><th>班級</th><th>座號</th><th>姓名</th><th>比較次數</th><th>用時</th></tr></thead><tbody>';
+  rows.forEach(function(r) {
+    var rank = Number(r.rank);
+    var isMe = myName && String(r.name) === myName && String(r.cls) === myCls && String(r.seat) === mySeat;
+    var rankClass = rank === 1 ? 'lb-rank-1' : rank === 2 ? 'lb-rank-2' : rank === 3 ? 'lb-rank-3' : '';
+    var rowClass = isMe ? ' class="lb-me"' : '';
+    var medal = medals[rank-1] || '';
+    html += '<tr' + rowClass + '>';
+    html += '<td class="' + rankClass + '">' + medal + ' ' + rank + '</td>';
+    html += '<td>' + r.cls + '</td>';
+    html += '<td>' + r.seat + '</td>';
+    html += '<td>' + r.name + (isMe ? ' 👈' : '') + '</td>';
+    html += '<td>' + r.compare + '</td>';
+    html += '<td>' + r.elapsed + '</td>';
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  contentEl.innerHTML = html;
+}
+
+// 切換球數時同步排行榜 tab
+document.getElementById('ballCount').addEventListener('change', function() {
+  switchLbTab(parseInt(this.value));
+});
 
 // ===== 啟動 =====
-renderHistory();
 initGame(); // 顯示學生資料 Modal
+setTimeout(fetchLeaderboard, 1500);
 </script>
 </body>
 </html>
