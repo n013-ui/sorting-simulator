@@ -15,7 +15,26 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 16px; }
 h1 { text-align: center; font-size: 2rem; font-weight: 900; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 4px; }
-.subtitle { text-align: center; color: var(--muted); font-size: 0.9rem; margin-bottom: 16px; }
+.subtitle { text-align: center; color: var(--muted); font-size: 0.9rem; margin-bottom: 12px; }
+
+/* ── 學生資料 Modal ── */
+.sm-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.88); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 16px; }
+.sm-card { background: var(--card); border: 2px solid var(--accent); border-radius: 20px; padding: 32px 28px; max-width: 380px; width: 100%; }
+.sm-card h2 { font-size: 1.4rem; font-weight: 900; color: var(--accent); margin-bottom: 6px; }
+.sm-card p { font-size: 0.85rem; color: var(--muted); margin-bottom: 22px; line-height: 1.6; }
+.sm-field { margin-bottom: 14px; }
+.sm-field label { display: block; font-size: 0.82rem; font-weight: 700; color: var(--muted); margin-bottom: 5px; }
+.sm-field input { width: 100%; background: var(--card2); border: 2px solid var(--border); color: var(--text); border-radius: 10px; padding: 10px 14px; font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 700; outline: none; transition: border-color 0.15s; }
+.sm-field input:focus { border-color: var(--accent); }
+.sm-warn { background: rgba(248,113,113,0.12); border: 1px solid var(--red); border-radius: 8px; padding: 8px 12px; font-size: 0.85rem; color: var(--red); margin-bottom: 12px; }
+
+/* ── 學生資訊列 ── */
+.student-bar { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+.student-chips { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.chip { background: var(--card2); border: 1px solid var(--border); border-radius: 8px; padding: 4px 12px; font-size: 0.82rem; font-weight: 700; }
+.chip .cl { color: var(--muted); font-weight: 400; margin-right: 3px; font-size: 0.75rem; }
+.chip-count { border-color: var(--gold); color: var(--gold); }
+.chip-best { border-color: var(--accent); color: var(--accent); font-size: 0.78rem; }
 
 .instructions { background: var(--card); border: 2px solid var(--accent); border-radius: 14px; padding: 16px 20px; margin-bottom: 16px; }
 .instructions .ititle { font-weight: 900; color: var(--accent); margin-bottom: 10px; font-size: 1rem; }
@@ -35,6 +54,7 @@ select { background: var(--card2); border: 1px solid var(--border); color: var(-
 .btn-danger { background: var(--red); color: #0f172a; }
 .btn-success { background: var(--green); color: #0f172a; }
 .btn-muted { background: var(--card2); color: var(--muted); border: 1px solid var(--border); }
+.btn-sm { padding: 5px 12px; font-size: 0.78rem; border-radius: 8px; }
 .btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none !important; filter: none !important; }
 
 .stats { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px; }
@@ -103,21 +123,61 @@ td { padding: 6px 10px; border-bottom: 1px solid var(--border); }
 tr:last-child td { border-bottom: none; }
 
 .win-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 99; }
-.win-banner { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); background: var(--card); border: 2px solid var(--green); border-radius: 20px; padding: 32px 40px; text-align: center; z-index: 100; box-shadow: 0 20px 60px rgba(0,0,0,0.8); min-width: 280px; }
+.win-banner { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); background: var(--card); border: 2px solid var(--green); border-radius: 20px; padding: 32px 36px; text-align: center; z-index: 100; box-shadow: 0 20px 60px rgba(0,0,0,0.8); min-width: 280px; max-width: 380px; width: 92%; }
 .win-banner h2 { font-size: 2rem; color: var(--green); -webkit-text-fill-color: var(--green); margin-bottom: 10px; }
-.win-stats { color: var(--muted); font-size: 0.95rem; line-height: 2.2; margin-bottom: 20px; }
+.win-stats { color: var(--muted); font-size: 0.92rem; line-height: 2.3; margin-bottom: 16px; text-align: left; }
+.win-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.submit-status { font-size: 0.82rem; font-weight: 700; margin: 6px 0 12px; min-height: 20px; }
+.submit-ok { color: var(--green); }
+.submit-err { color: var(--red); }
+.submit-pending { color: var(--gold); }
 
 @media (max-width: 480px) {
   h1 { font-size: 1.5rem; }
   .ball { width: 46px; height: 46px; font-size: 1.1rem; }
   .pan-zone { width: 100px; }
+  .win-banner { padding: 24px 18px; }
 }
 </style>
 </head>
 <body>
 
+<!-- 學生資料 Modal -->
+<div class="sm-overlay" id="smOverlay">
+  <div class="sm-card">
+    <h2>📝 學生資料</h2>
+    <p>請先填寫班級、座號與姓名，才能開始練習。<br>每次成功完成排序，成績才會記錄到雲端。</p>
+    <div class="sm-field">
+      <label>班級</label>
+      <input type="text" id="inputClass" placeholder="例如：303" maxlength="20" autocomplete="off">
+    </div>
+    <div class="sm-field">
+      <label>座號</label>
+      <input type="text" id="inputSeat" placeholder="例如：12" maxlength="5" autocomplete="off">
+    </div>
+    <div class="sm-field">
+      <label>姓名</label>
+      <input type="text" id="inputName" placeholder="請輸入真實姓名" maxlength="20" autocomplete="off">
+    </div>
+    <div class="sm-warn" id="smWarn" style="display:none">⚠️ 請填寫所有欄位</div>
+    <button class="btn btn-primary" style="width:100%;padding:12px;font-size:1rem;margin-top:4px" onclick="submitStudentInfo()">開始練習 →</button>
+  </div>
+</div>
+
 <h1>⚖️ 排序模擬器</h1>
 <p class="subtitle">自由練習排序 — 用任何方式把球從小排到大！</p>
+
+<!-- 學生資訊列 -->
+<div class="student-bar" id="studentBar" style="display:none">
+  <div class="student-chips">
+    <span class="chip"><span class="cl">班級</span><span id="chipClass">—</span></span>
+    <span class="chip"><span class="cl">座號</span><span id="chipSeat">—</span></span>
+    <span class="chip"><span class="cl">姓名</span><span id="chipName">—</span></span>
+    <span class="chip chip-count"><span class="cl">成功</span><span id="chipCount">0</span><span class="cl"> 次</span></span>
+    <span class="chip chip-best" id="chipBestWrap" style="display:none">🏆 最佳：<span id="chipBest">—</span></span>
+  </div>
+  <button class="btn btn-muted btn-sm" onclick="changeStudent()">換人</button>
+</div>
 
 <div class="instructions">
   <div class="ititle">📋 操作說明</div>
@@ -142,7 +202,7 @@ tr:last-child td { border-bottom: none; }
       <option value="8">8 顆</option>
     </select>
   </div>
-  <button class="btn btn-primary" onclick="initGame()">🔀 重新產生</button>
+  <button class="btn btn-primary" onclick="startNewGame()">🔀 重新產生</button>
 </div>
 
 <div class="stats">
@@ -225,12 +285,12 @@ tr:last-child td { border-bottom: none; }
 
 <div class="history-section">
   <div class="log-title">
-    <span>🏆 歷史紀錄</span>
+    <span>🏆 本機歷史紀錄</span>
     <button class="btn btn-danger" style="padding:4px 10px;font-size:0.75rem" onclick="clearHistory()">清除</button>
   </div>
   <table>
     <thead>
-      <tr><th>#</th><th>球數</th><th>比較次數</th><th>交換次數</th><th>用時</th><th>時間</th></tr>
+      <tr><th>#</th><th>姓名</th><th>球數</th><th>比較次數</th><th>交換次數</th><th>用時</th><th>時間</th></tr>
     </thead>
     <tbody id="historyBody"></tbody>
   </table>
@@ -240,25 +300,116 @@ tr:last-child td { border-bottom: none; }
 <div class="win-banner" id="winBanner">
   <h2>🎉 排序完成！</h2>
   <div class="win-stats" id="winStats"></div>
-  <button class="btn btn-primary" onclick="closeWin(); initGame()">🔀 再玩一次</button>
+  <div class="submit-status" id="submitStatus"></div>
+  <div class="win-actions">
+    <button class="btn btn-primary" onclick="closeWin(); startNewGame()">🔀 再練一次</button>
+    <button class="btn btn-muted" onclick="closeWin(); changeStudent()">換人</button>
+  </div>
 </div>
 
 <script>
+// ===== 設定（貼上你的 Google Apps Script URL）=====
+const SHEET_URL = '';
+
+// ===== 球的常數 =====
 const COLORS = ['#f43f5e','#f97316','#eab308','#22c55e','#06b6d4','#6366f1','#a855f7','#ec4899'];
 const BALL_LABELS = ['A','B','C','D','E','F','G','H'];
+
+// ===== 遊戲狀態 =====
 let arr = [], panL = null, panR = null;
-// arr stores weights (1..n) in shuffled positions.
-// labelOf[weight] = letter shown on that ball (randomly assigned, hides numeric identity)
 let labelOf = {};
 let compareCount = 0, swapCount = 0;
 let startTime = null, timerInterval = null, gameDone = false;
 let history = JSON.parse(localStorage.getItem('sortHistoryFree') || '[]');
 
+// ===== 學生狀態 =====
+let currentStudent = null; // { cls, seat, name }
+
+// ===== 個人紀錄（localStorage）=====
+function getRecordKey(s) {
+  return 'sortRecord_' + s.cls + '_' + s.seat + '_' + s.name;
+}
+function getStudentRecord(s) {
+  return JSON.parse(localStorage.getItem(getRecordKey(s)) || 'null');
+  // 格式: { count: N, best: { compare, sec, elapsed } }
+}
+function updateStudentRecord(s, compare, sec, elapsed) {
+  const key = getRecordKey(s);
+  const rec = getStudentRecord(s) || { count: 0, best: null };
+  rec.count += 1;
+  let isNewBest = false;
+  // 最佳判定：比較次數少優先，相同時秒數少者勝
+  if (!rec.best
+      || compare < rec.best.compare
+      || (compare === rec.best.compare && sec < rec.best.sec)) {
+    rec.best = { compare, sec, elapsed };
+    isNewBest = true;
+  }
+  localStorage.setItem(key, JSON.stringify(rec));
+  return { count: rec.count, isNewBest, best: rec.best };
+}
+
+function refreshStudentBar() {
+  if (!currentStudent) return;
+  document.getElementById('chipClass').textContent = currentStudent.cls;
+  document.getElementById('chipSeat').textContent = currentStudent.seat + ' 號';
+  document.getElementById('chipName').textContent = currentStudent.name;
+  const rec = getStudentRecord(currentStudent);
+  document.getElementById('chipCount').textContent = rec ? rec.count : 0;
+  const bestWrap = document.getElementById('chipBestWrap');
+  if (rec && rec.best) {
+    document.getElementById('chipBest').textContent =
+      '比較 ' + rec.best.compare + ' 次・' + rec.best.elapsed;
+    bestWrap.style.display = '';
+  } else {
+    bestWrap.style.display = 'none';
+  }
+}
+
+// ===== 學生 Modal =====
+function showStudentModal() {
+  document.getElementById('smOverlay').style.display = 'flex';
+  document.getElementById('smWarn').style.display = 'none';
+  document.getElementById('inputClass').value = '';
+  document.getElementById('inputSeat').value = '';
+  document.getElementById('inputName').value = '';
+  setTimeout(() => document.getElementById('inputClass').focus(), 100);
+}
+
+function submitStudentInfo() {
+  const cls  = document.getElementById('inputClass').value.trim();
+  const seat = document.getElementById('inputSeat').value.trim();
+  const name = document.getElementById('inputName').value.trim();
+  if (!cls || !seat || !name) {
+    document.getElementById('smWarn').style.display = 'block';
+    return;
+  }
+  currentStudent = { cls, seat, name };
+  document.getElementById('smOverlay').style.display = 'none';
+  document.getElementById('studentBar').style.display = 'flex';
+  refreshStudentBar();
+  startNewGame();
+}
+
+function changeStudent() {
+  currentStudent = null;
+  document.getElementById('studentBar').style.display = 'none';
+  showStudentModal();
+}
+
+// Enter 鍵送出 modal
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && document.getElementById('smOverlay').style.display !== 'none') {
+    submitStudentInfo();
+  }
+});
+
+// ===== 計時器 =====
 function startTimer() {
   startTime = Date.now();
   if (timerInterval) clearInterval(timerInterval);
-  timerInterval = setInterval(() => {
-    const e = Math.floor((Date.now() - startTime) / 1000);
+  timerInterval = setInterval(function() {
+    var e = Math.floor((Date.now() - startTime) / 1000);
     document.getElementById('statTime').textContent =
       String(Math.floor(e/60)).padStart(2,'0') + ':' + String(e%60).padStart(2,'0');
   }, 500);
@@ -266,106 +417,124 @@ function startTimer() {
 function stopTimer() { if (timerInterval) { clearInterval(timerInterval); timerInterval = null; } }
 function elapsedStr() {
   if (!startTime) return '00:00';
-  const e = Math.floor((Date.now() - startTime) / 1000);
+  var e = Math.floor((Date.now() - startTime) / 1000);
   return String(Math.floor(e/60)).padStart(2,'0') + ':' + String(e%60).padStart(2,'0');
 }
+function elapsedSec() {
+  if (!startTime) return 0;
+  return Math.floor((Date.now() - startTime) / 1000);
+}
 
+// ===== 工具 =====
 function shuffle(a) {
-  for (let i = a.length-1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  for (var i = a.length-1; i > 0; i--) {
+    var j = Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t;
+  }
   return a;
 }
-function isSorted() { for (let i=0;i<arr.length-1;i++) if (arr[i]>arr[i+1]) return false; return true; }
+function isSorted() { for (var i=0;i<arr.length-1;i++) if (arr[i]>arr[i+1]) return false; return true; }
 
+// ===== 遊戲初始化 =====
 function initGame() {
+  showStudentModal(); // 一定要先輸入學生資料
+}
+
+function startNewGame() {
   stopTimer();
-  const n = parseInt(document.getElementById('ballCount').value);
-  arr = shuffle([...Array(n)].map((_,i)=>i+1));
-  while (isSorted()) arr = shuffle([...arr]);
-  // Randomly assign letters to weights so numbers are completely hidden
-  const shuffledLabels = shuffle([...BALL_LABELS.slice(0, n)]);
+  var n = parseInt(document.getElementById('ballCount').value);
+  arr = shuffle(Array.from({length:n},function(_,i){return i+1;}));
+  while (isSorted()) arr = shuffle(arr.slice());
+  var shuffledLabels = shuffle(BALL_LABELS.slice(0, n));
   labelOf = {};
-  for (let w = 1; w <= n; w++) labelOf[w] = shuffledLabels[w-1];
+  for (var w = 1; w <= n; w++) labelOf[w] = shuffledLabels[w-1];
   compareCount = 0; swapCount = 0; gameDone = false; panL = null; panR = null;
   clearLog(); updateStats(); renderBalls(); resetScale();
   setMsg('把球拖曳到天平的左右托盤來開始比較！');
   document.getElementById('targetDisplay').textContent = '？ ＜ ？ ＜ ？（由輕到重排列）';
   document.getElementById('winBanner').style.display = 'none';
   document.getElementById('winOverlay').style.display = 'none';
+  document.getElementById('submitStatus').textContent = '';
   startTimer();
 }
 
+// ===== 渲染球 =====
 function renderBalls() {
-  const row = document.getElementById('ballsRow');
+  var row = document.getElementById('ballsRow');
   row.innerHTML = '';
-  arr.forEach((val, idx) => {
-    const item = document.createElement('div'); item.className = 'ball-item';
-    const ball = document.createElement('div'); ball.className = 'ball';
+  arr.forEach(function(val, idx) {
+    var item = document.createElement('div'); item.className = 'ball-item';
+    var ball = document.createElement('div'); ball.className = 'ball';
     ball.style.background = COLORS[(val-1)%COLORS.length]; ball.textContent = labelOf[val];
     if (!gameDone) {
       ball.draggable = true; ball.dataset.index = idx;
-      ball.addEventListener('dragstart', e => onDragStart(e, idx));
+      ball.addEventListener('dragstart', (function(i){ return function(e){ onDragStart(e,i); }; })(idx));
       ball.addEventListener('dragend', onDragEnd);
       if (panL && panL.index === idx) ball.classList.add('on-left');
       if (panR && panR.index === idx) ball.classList.add('on-right');
     } else { ball.classList.add('sorted'); }
-    const lbl = document.createElement('div'); lbl.className = 'ball-idx';
+    var lbl = document.createElement('div'); lbl.className = 'ball-idx';
     lbl.textContent = '位置 '+(idx+1);
     item.appendChild(ball); item.appendChild(lbl); row.appendChild(item);
   });
 }
 
+// ===== 拖曳 =====
 function onDragStart(e, index) {
   e.dataTransfer.setData('text/plain', String(index)); e.dataTransfer.effectAllowed = 'copy';
-  setTimeout(() => { document.querySelectorAll('.ball').forEach(b => { if (parseInt(b.dataset.index)===index) b.classList.add('dragging'); }); }, 0);
+  setTimeout(function(){ document.querySelectorAll('.ball').forEach(function(b){ if (parseInt(b.dataset.index)===index) b.classList.add('dragging'); }); }, 0);
 }
-function onDragEnd() { document.querySelectorAll('.ball').forEach(b => b.classList.remove('dragging')); }
+function onDragEnd() { document.querySelectorAll('.ball').forEach(function(b){ b.classList.remove('dragging'); }); }
 function onDragOverPan(e, side) { e.preventDefault(); e.dataTransfer.dropEffect='copy'; document.getElementById(side==='left'?'panLeft':'panRight').classList.add('over'); }
 function onDragLeavePan(e, side) { document.getElementById(side==='left'?'panLeft':'panRight').classList.remove('over'); }
 
 function onDropPan(e, side) {
   e.preventDefault();
   document.getElementById(side==='left'?'panLeft':'panRight').classList.remove('over');
-  const index = parseInt(e.dataTransfer.getData('text/plain'));
+  var index = parseInt(e.dataTransfer.getData('text/plain'));
   if (isNaN(index)||index<0||index>=arr.length) return;
-  const value = arr[index];
+  var value = arr[index];
   if (side==='left'  && panR && panR.index===index) { setMsg('⚠️ 這顆球已在右托盤！請選另一顆。'); return; }
   if (side==='right' && panL && panL.index===index) { setMsg('⚠️ 這顆球已在左托盤！請選另一顆。'); return; }
-  if (side==='left') panL={index,value}; else panR={index,value};
+  if (side==='left') panL={index:index,value:value}; else panR={index:index,value:value};
   renderPan('left', panL); renderPan('right', panR); renderBalls();
   document.getElementById('clearBtn').disabled = false;
-  if (panL && panR) { compareCount++; updateStats(); updateScale(); addLog('compare',`比較 球${labelOf[panL.value]}（位置${panL.index+1}）和 球${labelOf[panR.value]}（位置${panR.index+1}）`); document.getElementById('swapBtn').disabled=false; }
+  if (panL && panR) {
+    compareCount++; updateStats(); updateScale();
+    addLog('compare','比較 球'+labelOf[panL.value]+'（位置'+(panL.index+1)+'）和 球'+labelOf[panR.value]+'（位置'+(panR.index+1)+'）');
+    document.getElementById('swapBtn').disabled=false;
+  }
 }
 
 function renderPan(side, state) {
-  const panEl  = document.getElementById(side==='left'?'panLeft':'panRight');
-  const contEl = document.getElementById(side==='left'?'panLeftContent':'panRightContent');
+  var panEl  = document.getElementById(side==='left'?'panLeft':'panRight');
+  var contEl = document.getElementById(side==='left'?'panLeftContent':'panRightContent');
   panEl.classList.remove('filled-left','filled-right');
   if (state) {
     panEl.classList.add(side==='left'?'filled-left':'filled-right');
-    const ball = document.createElement('div'); ball.className='pan-ball';
+    var ball = document.createElement('div'); ball.className='pan-ball';
     ball.style.background=COLORS[(state.value-1)%COLORS.length]; ball.textContent=labelOf[state.value];
-    const pos = document.createElement('div'); pos.className='pan-pos'; pos.textContent='位置 '+(state.index+1);
+    var pos = document.createElement('div'); pos.className='pan-pos'; pos.textContent='位置 '+(state.index+1);
     contEl.innerHTML=''; contEl.appendChild(ball); contEl.appendChild(pos);
   } else { contEl.innerHTML='<span class="pan-empty-hint">將球拖曳<br>至此</span>'; }
 }
 
 function updateScale() {
   if (!panL||!panR) return;
-  const l=panL.value, r=panR.value;
-  const beam=document.getElementById('scaleBeam'), res=document.getElementById('scaleResult');
-  const lLabel = labelOf[l], rLabel = labelOf[r];
+  var l=panL.value, r=panR.value;
+  var beam=document.getElementById('scaleBeam'), res=document.getElementById('scaleResult');
+  var lLabel = labelOf[l], rLabel = labelOf[r];
   if (l>r) {
     beam.style.transform='translateX(-50%) rotate(-15deg)';
-    res.innerHTML=`<span style="color:var(--accent2)">球 ${lLabel} 較重 ↙，球 ${rLabel} 較輕</span>`;
-    setMsg(`⚖️ 球 ${lLabel}（位置${panL.index+1}）比 球 ${rLabel}（位置${panR.index+1}）重 — 需要交換嗎？`);
+    res.innerHTML='<span style="color:var(--accent2)">球 '+lLabel+' 較重 ↙，球 '+rLabel+' 較輕</span>';
+    setMsg('⚖️ 球 '+lLabel+'（位置'+(panL.index+1)+'）比 球 '+rLabel+'（位置'+(panR.index+1)+'）重 — 需要交換嗎？');
   } else if (l<r) {
     beam.style.transform='translateX(-50%) rotate(15deg)';
-    res.innerHTML=`<span style="color:var(--green)">球 ${lLabel} 較輕，球 ${rLabel} 較重 ↘</span>`;
-    setMsg(`⚖️ 球 ${lLabel}（位置${panL.index+1}）比 球 ${rLabel}（位置${panR.index+1}）輕 — 順序正確，不需交換！`);
+    res.innerHTML='<span style="color:var(--green)">球 '+lLabel+' 較輕，球 '+rLabel+' 較重 ↘</span>';
+    setMsg('⚖️ 球 '+lLabel+'（位置'+(panL.index+1)+'）比 球 '+rLabel+'（位置'+(panR.index+1)+'）輕 — 順序正確，不需交換！');
   } else {
     beam.style.transform='translateX(-50%) rotate(0deg)';
-    res.innerHTML=`<span style="color:var(--muted)">兩球一樣重，天平平衡</span>`;
-    setMsg(`⚖️ 兩球一樣重，不需要交換。`);
+    res.innerHTML='<span style="color:var(--muted)">兩球一樣重，天平平衡</span>';
+    setMsg('⚖️ 兩球一樣重，不需要交換。');
   }
 }
 
@@ -378,62 +547,134 @@ function resetScale() {
 
 function doSwap() {
   if (!panL||!panR) return;
-  const li=panL.index,ri=panR.index,lv=panL.value,rv=panR.value;
-  [arr[li],arr[ri]]=[arr[ri],arr[li]];
+  var li=panL.index,ri=panR.index,lv=panL.value,rv=panR.value;
+  var tmp=arr[li]; arr[li]=arr[ri]; arr[ri]=tmp;
   swapCount++; updateStats();
-  addLog('swap',`交換 球${labelOf[lv]}（位置${li+1}）↔ 球${labelOf[rv]}（位置${ri+1}）`);
-  setMsg(`🔄 已交換！球 ${labelOf[lv]} 移到位置${ri+1}，球 ${labelOf[rv]} 移到位置${li+1}`);
+  addLog('swap','交換 球'+labelOf[lv]+'（位置'+(li+1)+'）↔ 球'+labelOf[rv]+'（位置'+(ri+1)+'）');
+  setMsg('🔄 已交換！球 '+labelOf[lv]+' 移到位置'+(ri+1)+'，球 '+labelOf[rv]+' 移到位置'+(li+1));
   panL=null; panR=null; resetScale(); renderBalls(); checkWin();
 }
 
 function clearPans() { panL=null; panR=null; resetScale(); renderBalls(); setMsg('托盤已清除，繼續拖曳球來比較。'); }
 
+// ===== 勝利判定 =====
 function checkWin() {
   if (!isSorted()) return;
-  gameDone=true; stopTimer();
-  const t=elapsedStr();
-  const order = arr.map(w=>`球${labelOf[w]}`).join('＜');
-  addLog('done',`排序完成！${order}，比較 ${compareCount} 次，交換 ${swapCount} 次，用時 ${t}`);
-  setMsg(`🎉 排序完成！比較 ${compareCount} 次，交換 ${swapCount} 次，用時 ${t}`);
-  saveHistory(); renderBalls();
-  // Reveal the correct order
-  const revealOrder = arr.map(w => `球${labelOf[w]}`).join(' ＜ ');
-  document.getElementById('winStats').innerHTML=`⚖️ 比較次數：${compareCount} 次<br>🔄 交換次數：${swapCount} 次<br>⏱️ 用時：${t}<br><span style="color:var(--green);font-size:0.85rem">正確排列：${revealOrder}</span>`;
-  document.getElementById('winBanner').style.display='block';
-  document.getElementById('winOverlay').style.display='block';
-}
-function closeWin() { document.getElementById('winBanner').style.display='none'; document.getElementById('winOverlay').style.display='none'; }
+  gameDone = true; stopTimer();
+  var t = elapsedStr();
+  var sec = elapsedSec();
+  var n = parseInt(document.getElementById('ballCount').value);
 
-function updateStats() { document.getElementById('statCompare').textContent=compareCount; document.getElementById('statSwap').textContent=swapCount; }
-function setMsg(text) { document.getElementById('msgBox').innerHTML=text; }
+  // 更新個人最佳紀錄
+  var result = updateStudentRecord(currentStudent, compareCount, sec, t);
+  var count = result.count, isNewBest = result.isNewBest, best = result.best;
+  refreshStudentBar();
+
+  // 上傳到 Google Sheets（非同步，不阻塞）
+  submitToSheets(currentStudent, n, compareCount, swapCount, sec, t, count, isNewBest, best);
+
+  // 操作紀錄
+  var order = arr.map(function(w){ return '球'+labelOf[w]; }).join('＜');
+  addLog('done','排序完成！'+order+'，比較 '+compareCount+' 次，交換 '+swapCount+' 次，用時 '+t);
+  setMsg('🎉 排序完成！比較 '+compareCount+' 次，交換 '+swapCount+' 次，用時 '+t);
+  saveHistory(); renderBalls();
+
+  // 勝利 Banner
+  var revealOrder = arr.map(function(w){ return '球'+labelOf[w]; }).join(' ＜ ');
+  var html = '';
+  html += '👤 ' + currentStudent.cls + '&nbsp;' + currentStudent.seat + '號&nbsp;' + currentStudent.name + '<br>';
+  html += '⚖️ 比較次數：<b>' + compareCount + '</b> 次　🔄 交換次數：<b>' + swapCount + '</b> 次<br>';
+  html += '⏱️ 用時：<b>' + t + '</b><br>';
+  html += '🎯 第 <b>' + count + '</b> 次成功完成！<br>';
+  if (isNewBest) {
+    html += '<span style="color:var(--gold);font-size:1.05rem;font-weight:900">🏆 新最佳紀錄！</span><br>';
+  } else {
+    html += '<span style="color:var(--accent);font-size:0.88rem">個人最佳：比較 '+best.compare+' 次・'+best.elapsed+'</span><br>';
+  }
+  html += '<span style="color:var(--green);font-size:0.82rem">正確排列：'+revealOrder+'</span>';
+  document.getElementById('winStats').innerHTML = html;
+  document.getElementById('winBanner').style.display = 'block';
+  document.getElementById('winOverlay').style.display = 'block';
+}
+
+function closeWin() {
+  document.getElementById('winBanner').style.display='none';
+  document.getElementById('winOverlay').style.display='none';
+}
+
+// ===== Google Sheets 上傳 =====
+function submitToSheets(s, balls, compare, swap, sec, elapsed, count, isNewBest, best) {
+  var statusEl = document.getElementById('submitStatus');
+  if (!SHEET_URL) return;
+  statusEl.className = 'submit-status submit-pending';
+  statusEl.textContent = '⏳ 上傳成績中…';
+  fetch(SHEET_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      type: 'sorting',
+      cls: s.cls, seat: s.seat, name: s.name,
+      balls: balls, compare: compare, swap: swap,
+      sec: sec, elapsed: elapsed,
+      count: count, isNewBest: isNewBest ? '是' : '否',
+      bestCompare: best.compare, bestSec: best.sec, bestElapsed: best.elapsed
+    })
+  }).then(function() {
+    statusEl.className = 'submit-status submit-ok';
+    statusEl.textContent = '✅ 成績已送出';
+  }).catch(function() {
+    statusEl.className = 'submit-status submit-err';
+    statusEl.textContent = '⚠️ 上傳失敗，請確認網路連線';
+  });
+}
+
+// ===== 統計與訊息 =====
+function updateStats() {
+  document.getElementById('statCompare').textContent = compareCount;
+  document.getElementById('statSwap').textContent = swapCount;
+}
+function setMsg(text) { document.getElementById('msgBox').innerHTML = text; }
 
 function addLog(type, msg) {
-  const list=document.getElementById('logList');
-  const entry=document.createElement('div'); entry.className='log-entry';
-  const tag=document.createElement('span'); tag.className='tag';
-  if (type==='compare'){tag.classList.add('tag-compare');tag.textContent='比較';}
-  else if (type==='swap'){tag.classList.add('tag-swap');tag.textContent='交換';}
-  else{tag.classList.add('tag-done');tag.textContent='完成';}
+  var list = document.getElementById('logList');
+  var entry = document.createElement('div'); entry.className = 'log-entry';
+  var tag = document.createElement('span'); tag.className = 'tag';
+  if (type==='compare'){ tag.classList.add('tag-compare'); tag.textContent='比較'; }
+  else if (type==='swap'){ tag.classList.add('tag-swap'); tag.textContent='交換'; }
+  else { tag.classList.add('tag-done'); tag.textContent='完成'; }
   entry.appendChild(tag); entry.appendChild(document.createTextNode(' '+msg));
-  list.appendChild(entry); list.scrollTop=list.scrollHeight;
-  document.getElementById('logCount').textContent=list.children.length+' 筆';
+  list.appendChild(entry); list.scrollTop = list.scrollHeight;
+  document.getElementById('logCount').textContent = list.children.length + ' 筆';
 }
 function clearLog() { document.getElementById('logList').innerHTML=''; document.getElementById('logCount').textContent='0 筆'; }
 
+// ===== 本機歷史紀錄 =====
 function saveHistory() {
-  const n=parseInt(document.getElementById('ballCount').value);
-  history.unshift({n,compare:compareCount,swap:swapCount,elapsed:elapsedStr(),time:new Date().toLocaleTimeString('zh-TW')});
-  if (history.length>20) history=history.slice(0,20);
-  localStorage.setItem('sortHistoryFree',JSON.stringify(history)); renderHistory();
+  var n = parseInt(document.getElementById('ballCount').value);
+  var name = currentStudent ? currentStudent.name : '—';
+  history.unshift({
+    n: n, name: name,
+    compare: compareCount, swap: swapCount,
+    elapsed: elapsedStr(), time: new Date().toLocaleTimeString('zh-TW')
+  });
+  if (history.length > 20) history = history.slice(0, 20);
+  localStorage.setItem('sortHistoryFree', JSON.stringify(history));
+  renderHistory();
 }
 function renderHistory() {
-  const tbody=document.getElementById('historyBody'); tbody.innerHTML='';
-  history.forEach((h,i)=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${i+1}</td><td>${h.n} 顆</td><td>${h.compare}</td><td>${h.swap}</td><td>${h.elapsed||'-'}</td><td>${h.time}</td>`; tbody.appendChild(tr); });
+  var tbody = document.getElementById('historyBody'); tbody.innerHTML = '';
+  history.forEach(function(h, i) {
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td>'+(i+1)+'</td><td>'+(h.name||'—')+'</td><td>'+h.n+' 顆</td><td>'+h.compare+'</td><td>'+h.swap+'</td><td>'+(h.elapsed||'-')+'</td><td>'+h.time+'</td>';
+    tbody.appendChild(tr);
+  });
 }
 function clearHistory() { history=[]; localStorage.removeItem('sortHistoryFree'); renderHistory(); }
 
+// ===== 啟動 =====
 renderHistory();
-initGame();
+initGame(); // 顯示學生資料 Modal
 </script>
 </body>
 </html>

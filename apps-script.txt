@@ -1,9 +1,13 @@
 ===== Google Apps Script 設定說明 =====
 
+【適用範圍】
+・排序模擬器（index.html）— 自由練習模式，記錄學生成功的練習成績
+・氣泡 / 選擇 / 插入排序法測驗頁面（舊功能保留）
+
 【步驟】
 
 1. 前往 Google 試算表，建立一個新試算表
-   （命名例如：「排序法測驗成績」）
+   （命名例如：「排序模擬器成績紀錄」）
 
 2. 點上方選單「延伸功能」→「Apps Script」
 
@@ -14,18 +18,42 @@
 function doPost(e) {
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
-    let sheet = ss.getSheetByName('成績紀錄');
-    if (!sheet) {
-      sheet = ss.insertSheet('成績紀錄');
-      sheet.appendRow(['時間','科目','班級','座號','姓名','得分','總分','正確率(%)','用時','原始資料']);
-      sheet.getRange(1,1,1,10).setFontWeight('bold').setBackground('#f3f4f6');
-    }
     const d = JSON.parse(e.postData.contents);
-    sheet.appendRow([
-      Utilities.formatDate(new Date(), 'Asia/Taipei', 'yyyy/MM/dd HH:mm:ss'),
-      d.subject, d.class, d.seat, d.name,
-      d.score, d.total, d.pct, d.elapsed, d.original
-    ]);
+
+    if (d.type === 'sorting') {
+      // ── 排序模擬器練習紀錄 ──
+      let sheet = ss.getSheetByName('排序練習紀錄');
+      if (!sheet) {
+        sheet = ss.insertSheet('排序練習紀錄');
+        sheet.appendRow([
+          '時間戳記','班級','座號','姓名',
+          '球數','比較次數','交換次數','用時(秒)','用時顯示',
+          '第幾次成功','是否最佳','最佳比較次數','最佳用時(秒)','最佳用時顯示'
+        ]);
+        sheet.getRange(1,1,1,14).setFontWeight('bold').setBackground('#e0f2fe');
+      }
+      sheet.appendRow([
+        Utilities.formatDate(new Date(), 'Asia/Taipei', 'yyyy/MM/dd HH:mm:ss'),
+        d.cls, d.seat, d.name,
+        d.balls, d.compare, d.swap, d.sec, d.elapsed,
+        d.count, d.isNewBest, d.bestCompare, d.bestSec, d.bestElapsed
+      ]);
+
+    } else {
+      // ── 測驗成績紀錄（氣泡/選擇/插入排序法）──
+      let sheet = ss.getSheetByName('成績紀錄');
+      if (!sheet) {
+        sheet = ss.insertSheet('成績紀錄');
+        sheet.appendRow(['時間','科目','班級','座號','姓名','得分','總分','正確率(%)','用時','原始資料']);
+        sheet.getRange(1,1,1,10).setFontWeight('bold').setBackground('#f3f4f6');
+      }
+      sheet.appendRow([
+        Utilities.formatDate(new Date(), 'Asia/Taipei', 'yyyy/MM/dd HH:mm:ss'),
+        d.subject, d.class, d.seat, d.name,
+        d.score, d.total, d.pct, d.elapsed, d.original
+      ]);
+    }
+
     return ContentService.createTextOutput('ok');
   } catch(err) {
     return ContentService.createTextOutput('err:' + err.toString());
@@ -33,7 +61,7 @@ function doPost(e) {
 }
 
 function doGet(e) {
-  return ContentService.createTextOutput('排序法測驗成績收集系統');
+  return ContentService.createTextOutput('排序模擬器成績收集系統');
 }
 
 ─────────────────────────────────────────────
@@ -49,15 +77,21 @@ function doGet(e) {
 6. 複製「網頁應用程式 URL」（格式如下）：
    https://script.google.com/macros/s/XXXXXXXX/exec
 
-7. 將此 URL 貼到三個測驗 HTML 的第一行設定：
+7. 將此 URL 貼到 index.html 頂部的設定：
    const SHEET_URL = '貼在這裡';
 
-   ➤ insertion-sort.html（插入排序法）
-   ➤ bubble-sort.html（氣泡排序法）
-   ➤ selection-sort.html（選擇排序法）
+8. 重新推送到 GitHub（git push）
 
-8. 重新推送到 GitHub（或請 Claude 幫你推送）
+===== 試算表欄位說明 =====
 
-===== 完成！=====
-學生交卷後，成績會自動出現在試算表的「成績紀錄」工作表中。
-欄位：時間 / 科目 / 班級 / 座號 / 姓名 / 得分 / 總分 / 正確率 / 用時 / 原始資料
+【排序練習紀錄】工作表：
+  時間戳記 / 班級 / 座號 / 姓名 /
+  球數 / 比較次數 / 交換次數 / 用時(秒) / 用時顯示 /
+  第幾次成功 / 是否最佳 / 最佳比較次數 / 最佳用時(秒) / 最佳用時顯示
+
+  ※ 只寫入「成功」的紀錄；失敗或中途放棄不會上傳
+  ※「是否最佳」= 是/否，代表本次是否打破個人最佳成績
+  ※「最佳比較次數」優先比較；相同時再比「最佳用時(秒)」
+
+【成績紀錄】工作表（測驗頁面，原有功能）：
+  時間 / 科目 / 班級 / 座號 / 姓名 / 得分 / 總分 / 正確率 / 用時 / 原始資料
