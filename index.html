@@ -173,6 +173,16 @@ select { background: var(--card2); border: 1px solid var(--border); color: var(-
   </div>
 </div>
 
+<!-- 個人紀錄 Modal -->
+<div class="sm-overlay" id="myRecordsOverlay" style="display:none" onclick="hideMyRecords()">
+  <div class="sm-card" style="max-width:440px" onclick="event.stopPropagation()">
+    <h2>📊 我的最佳紀錄</h2>
+    <p id="myRecordsMeta" style="font-size:0.82rem;color:var(--muted);margin-bottom:16px;line-height:1.6"></p>
+    <div id="myRecordsContent"></div>
+    <button class="btn btn-muted" style="width:100%;padding:12px;margin-top:16px" onclick="hideMyRecords()">關閉</button>
+  </div>
+</div>
+
 <h1>⚖️ 排序模擬器</h1>
 <p class="subtitle">自由練習排序 — 用任何方式把球從小排到大！</p>
 
@@ -183,9 +193,12 @@ select { background: var(--card2); border: 1px solid var(--border); color: var(-
     <span class="chip"><span class="cl">座號</span><span id="chipSeat">—</span></span>
     <span class="chip"><span class="cl">姓名</span><span id="chipName">—</span></span>
     <span class="chip chip-count"><span class="cl">成功</span><span id="chipCount">0</span><span class="cl"> 次</span></span>
-    <span class="chip chip-best" id="chipBestWrap" style="display:none">🏆 最佳：<span id="chipBest">—</span></span>
+    <span class="chip chip-best" id="chipBestWrap" style="display:none">🏆 <span id="chipBestLabel">最佳</span>：<span id="chipBest">—</span></span>
   </div>
-  <button class="btn btn-muted btn-sm" onclick="changeStudent()">換人</button>
+  <div style="display:flex;gap:6px">
+    <button class="btn btn-muted btn-sm" onclick="showMyRecords()">📊 我的紀錄</button>
+    <button class="btn btn-muted btn-sm" onclick="changeStudent()">換人</button>
+  </div>
 </div>
 
 <div class="instructions">
@@ -349,20 +362,22 @@ function getStudentRecord(s) {
   return JSON.parse(localStorage.getItem(getRecordKey(s)) || 'null');
   // 格式: { count: N, best: { compare, sec, elapsed } }
 }
-function updateStudentRecord(s, compare, sec, elapsed) {
+function updateStudentRecord(s, balls, compare, sec, elapsed) {
   const key = getRecordKey(s);
-  const rec = getStudentRecord(s) || { count: 0, best: null };
-  rec.count += 1;
+  const rec = getStudentRecord(s) || { count: 0, bests: {} };
+  rec.count = (rec.count || 0) + 1;
+  if (!rec.bests) rec.bests = {}; // 相容舊格式
+  const ex = rec.bests[balls];
   let isNewBest = false;
   // 最佳判定：比較次數少優先，相同時秒數少者勝
-  if (!rec.best
-      || compare < rec.best.compare
-      || (compare === rec.best.compare && sec < rec.best.sec)) {
-    rec.best = { compare, sec, elapsed };
+  if (!ex
+      || compare < ex.compare
+      || (compare === ex.compare && sec < ex.sec)) {
+    rec.bests[balls] = { compare, sec, elapsed };
     isNewBest = true;
   }
   localStorage.setItem(key, JSON.stringify(rec));
-  return { count: rec.count, isNewBest, best: rec.best };
+  return { count: rec.count, isNewBest, best: rec.bests[balls] };
 }
 
 function refreshStudentBar() {
@@ -371,11 +386,13 @@ function refreshStudentBar() {
   document.getElementById('chipSeat').textContent = currentStudent.seat + ' 號';
   document.getElementById('chipName').textContent = currentStudent.name;
   const rec = getStudentRecord(currentStudent);
-  document.getElementById('chipCount').textContent = rec ? rec.count : 0;
+  document.getElementById('chipCount').textContent = rec ? (rec.count || 0) : 0;
   const bestWrap = document.getElementById('chipBestWrap');
-  if (rec && rec.best) {
+  const currentBest = rec && rec.bests && rec.bests[currentBallCount];
+  if (currentBest) {
+    document.getElementById('chipBestLabel').textContent = currentBallCount + '顆最佳';
     document.getElementById('chipBest').textContent =
-      '比較 ' + rec.best.compare + ' 次・' + rec.best.elapsed;
+      '比較 ' + currentBest.compare + ' 次・' + currentBest.elapsed;
     bestWrap.style.display = '';
   } else {
     bestWrap.style.display = 'none';
@@ -459,6 +476,7 @@ function startNewGame() {
   stopTimer();
   var n = parseInt(document.getElementById('ballCount').value);
   currentBallCount = n;
+  refreshStudentBar();
   switchLbTab(n);
   arr = shuffle(Array.from({length:n},function(_,i){return i+1;}));
   while (isSorted()) arr = shuffle(arr.slice());
@@ -583,8 +601,8 @@ function checkWin() {
   var sec = elapsedSec();
   var n = parseInt(document.getElementById('ballCount').value);
 
-  // 更新個人最佳紀錄
-  var result = updateStudentRecord(currentStudent, compareCount, sec, t);
+  // 更新個人最佳紀錄（依球數分開記錄）
+  var result = updateStudentRecord(currentStudent, n, compareCount, sec, t);
   var count = result.count, isNewBest = result.isNewBest, best = result.best;
   refreshStudentBar();
 
@@ -710,6 +728,7 @@ function switchLbTab(balls) {
 function renderLeaderboard(balls) {
   var contentEl = document.getElementById('lbContent');
   var rows = lbData.filter(function(r) { return Number(r.balls) === balls; });
+  rows.sort(function(a, b) { return Number(a.rank) - Number(b.rank); });
   if (rows.length === 0) {
     contentEl.innerHTML = '<div class="lb-empty">目前還沒有 ' + balls + ' 顆球的紀錄 — 來爭第一名吧！</div>';
     return;
@@ -738,9 +757,45 @@ function renderLeaderboard(balls) {
   contentEl.innerHTML = html;
 }
 
-// 切換球數時同步排行榜 tab
+// ===== 個人紀錄查詢 =====
+function showMyRecords() {
+  document.getElementById('myRecordsOverlay').style.display = 'flex';
+  if (!currentStudent) return;
+  var rec = getStudentRecord(currentStudent);
+  document.getElementById('myRecordsMeta').textContent =
+    currentStudent.cls + '　' + currentStudent.seat + ' 號　' + currentStudent.name +
+    '　　共完成 ' + (rec ? (rec.count || 0) : 0) + ' 次排序';
+  var contentEl = document.getElementById('myRecordsContent');
+  var bests = rec && rec.bests ? rec.bests : {};
+  var hasBests = [4,5,6,7,8].some(function(b){ return !!bests[b]; });
+  if (!hasBests) {
+    contentEl.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">還沒有任何完成紀錄，快去挑戰看看！</div>';
+    return;
+  }
+  var html = '<table class="lb-table"><thead><tr><th>球數</th><th>最佳比較次數</th><th>最佳用時</th></tr></thead><tbody>';
+  [4,5,6,7,8].forEach(function(b) {
+    var best = bests[b];
+    if (!best) return;
+    var isCurrent = (b === currentBallCount);
+    html += '<tr' + (isCurrent ? ' style="background:rgba(56,189,248,0.1)"' : '') + '>';
+    html += '<td style="font-weight:900;color:var(--accent)">' + b + ' 顆' + (isCurrent ? '　◀ 目前' : '') + '</td>';
+    html += '<td>' + best.compare + ' 次</td>';
+    html += '<td>' + best.elapsed + '</td>';
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  contentEl.innerHTML = html;
+}
+
+function hideMyRecords() {
+  document.getElementById('myRecordsOverlay').style.display = 'none';
+}
+
+// 切換球數時同步排行榜 tab 和個人最佳顯示
 document.getElementById('ballCount').addEventListener('change', function() {
-  switchLbTab(parseInt(this.value));
+  currentBallCount = parseInt(this.value);
+  refreshStudentBar();
+  switchLbTab(currentBallCount);
 });
 
 // ===== 啟動 =====
