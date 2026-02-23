@@ -725,10 +725,24 @@ function switchLbTab(balls) {
   renderLeaderboard(balls);
 }
 
+function secToElapsed(sec) {
+  var s = Number(sec);
+  var m = Math.floor(s / 60);
+  return String(m).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+}
+
 function renderLeaderboard(balls) {
   var contentEl = document.getElementById('lbContent');
   var rows = lbData.filter(function(r) { return Number(r.balls) === balls; });
   rows.sort(function(a, b) { return Number(a.rank) - Number(b.rank); });
+  // 去重：同球數下每個排名只保留第一筆（防止並發寫入造成的重複列）
+  var seenRanks = {};
+  rows = rows.filter(function(r) {
+    var rank = Number(r.rank);
+    if (seenRanks[rank]) return false;
+    seenRanks[rank] = true;
+    return true;
+  });
   if (rows.length === 0) {
     contentEl.innerHTML = '<div class="lb-empty">目前還沒有 ' + balls + ' 顆球的紀錄 — 來爭第一名吧！</div>';
     return;
@@ -750,7 +764,7 @@ function renderLeaderboard(balls) {
     html += '<td>' + r.seat + '</td>';
     html += '<td>' + r.name + (isMe ? ' 👈' : '') + '</td>';
     html += '<td>' + r.compare + '</td>';
-    html += '<td>' + r.elapsed + '</td>';
+    html += '<td>' + secToElapsed(r.sec) + '</td>';
     html += '</tr>';
   });
   html += '</tbody></table>';
